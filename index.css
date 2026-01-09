@@ -1,0 +1,116 @@
+
+:root {
+  /* Dynamic M3 Base Transitions */
+  --m3-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --m3-easing-emphasized: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --m3-duration-short: 200ms;
+  --m3-duration-medium: 400ms;
+  --m3-duration-long: 700ms;
+
+  /* Default (Saffron) Tonal Palette */
+  --md-sys-color-primary: #8F4E00;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #FFDCC3;
+  --md-sys-color-on-primary-container: #2E1500;
+  --md-sys-color-secondary: #745A45;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-surface: #FFF8F5;
+  --md-sys-color-on-surface: #221A15;
+  --md-sys-color-outline: #83746A;
+  --md-sys-color-surface-variant: #F2DFD1;
+}
+
+/* Theme overrides */
+.theme-midnight {
+  --md-sys-color-primary: #D0BCFF;
+  --md-sys-color-on-primary: #381E72;
+  --md-sys-color-primary-container: #4F378B;
+  --md-sys-color-on-primary-container: #EADDFF;
+  --md-sys-color-secondary: #CCC2DC;
+  --md-sys-color-on-secondary: #332D41;
+  --md-sys-color-surface: #1C1B1F;
+  --md-sys-color-on-surface: #E6E1E5;
+  --md-sys-color-outline: #938F99;
+  --md-sys-color-surface-variant: #49454F;
+}
+
+.theme-emerald {
+  --md-sys-color-primary: #006D3B;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #97F7B5;
+  --md-sys-color-on-primary-container: #00210E;
+  --md-sys-color-secondary: #4F6353;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-surface: #FBFDF8;
+  --md-sys-color-on-surface: #191C19;
+  --md-sys-color-outline: #717971;
+  --md-sys-color-surface-variant: #DDE5DB;
+}
+
+/* Material 3 Card Bases */
+.m3-card-elevated {
+  background: var(--md-sys-color-surface-variant);
+  border-radius: 28px;
+  padding: 16px;
+  transition: transform var(--m3-duration-short) var(--m3-easing-standard), box-shadow var(--m3-duration-short) var(--m3-easing-standard);
+}
+
+.m3-card-outlined {
+  background: var(--md-sys-color-surface);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 28px;
+  padding: 16px;
+}
+
+/* Edge-to-Edge Padding Helpers */
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Navigation Ripple (Simulation) */
+.m3-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.m3-ripple::after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  background-image: radial-gradient(circle, #000 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10, 10);
+  opacity: 0;
+  transition: transform .5s, opacity 1s;
+}
+
+.m3-ripple:active::after {
+  transform: scale(0, 0);
+  opacity: .2;
+  transition: 0s;
+}
+
+/* Smooth Tab Transitions */
+.tab-content {
+  transition: opacity var(--m3-duration-medium) var(--m3-easing-standard), transform var(--m3-duration-medium) var(--m3-easing-standard);
+}
+
+.tab-exit {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.tab-enter {
+  opacity: 1;
+  transform: translateY(0);
+}
