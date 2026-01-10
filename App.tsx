@@ -31,11 +31,12 @@ const App: React.FC = () => {
   }, []);
 
   const syncData = useCallback(async (force = false) => {
-    if (!force && !isCacheStale() && tithis.length > 0) return;
+    if (!force && !isCacheStale() && tithis.length > 50) return;
 
     setSyncing(true);
     const now = new Date();
-    const data = await fetchTithisForRange(now.getFullYear(), now.getMonth() + 1, 6);
+    // Sync a large range (18 months) to ensure full coverage of the new data
+    const data = await fetchTithisForRange(now.getFullYear(), now.getMonth() + 1, 18);
 
     if (data && data.length > 0) {
       saveTithisToCache(data);
@@ -83,10 +84,10 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Ensure tithis are always sorted chronologically by date and start time
+  // Ensure tithis are always sorted chronologically by date
   const sortedTithis = useMemo(() => {
     return [...tithis]
-      .filter(t => t && t.event) // Defensive check
+      .filter(t => t && t.date) // Defensive check, allow null events
       .sort((a, b) => {
         const d = a.date.localeCompare(b.date);
         if (d !== 0) return d;
@@ -103,15 +104,18 @@ const App: React.FC = () => {
   // Filtered list for 'Upcoming' section - Paginated batches of 5
   const { paginatedTithis, totalPages, totalCount } = useMemo(() => {
     // 1. Get all future tithis (strictly after today)
-    let list = sortedTithis.filter(t => t.date > todayStr);
+    // For 'Upcoming', we still only want entries with actual events
+    let list = sortedTithis.filter(t => t.date > todayStr && t.event);
 
     // 2. Filter by type
     if (activeFilter !== 'All') {
       list = list.filter(t => {
-        if (activeFilter === 'Purnima') return t.event?.type === 'Purnima' || t.banglaDate?.tithi === 'পূর্ণিমা';
-        if (activeFilter === 'Amavasya') return t.event?.type === 'Amavasya' || t.banglaDate?.tithi === 'অমাবস্যা';
-        if (activeFilter === 'Ekadashi') return t.event?.type === 'Ekadashi' || t.banglaDate?.tithi?.includes('একাদশী');
-        return t.event?.type === activeFilter;
+        const typeStr = t.event?.type || '';
+        const tithiBN = t.banglaDate?.tithi || '';
+        if (activeFilter === 'Purnima') return typeStr.includes('Purnima') || tithiBN === 'পূর্ণিমা';
+        if (activeFilter === 'Amavasya') return typeStr.includes('Amavasya') || tithiBN === 'অমাবস্যা';
+        if (activeFilter === 'Ekadashi') return typeStr.includes('Ekadashi') || tithiBN.includes('একাদশী');
+        return typeStr.includes(activeFilter);
       });
     }
 
@@ -147,7 +151,7 @@ const App: React.FC = () => {
 
   const handleTithiClick = async (tithi: TithiEvent) => {
     triggerHaptic('selection');
-    if (selectedTithi?.event.name === tithi.event.name && selectedTithi?.date === tithi.date) {
+    if (selectedTithi?.event?.name === tithi.event?.name && selectedTithi?.date === tithi.date) {
       setSelectedTithi(null);
       return;
     }
@@ -175,7 +179,8 @@ const App: React.FC = () => {
   };
 
   const getTithiColorClass = (type: string) => {
-    switch (type) {
+    const primaryType = type.split(',')[0].trim();
+    switch (primaryType) {
       case 'Festival': return 'from-red-100 to-orange-200 border-red-300 text-red-950';
       case 'Purnima': return 'from-amber-100 to-yellow-200 border-amber-300 text-amber-950';
       case 'Amavasya': return 'from-slate-700 to-slate-900 border-slate-600 text-white';
@@ -217,8 +222,9 @@ const App: React.FC = () => {
   };
 
   const CompactTithiCard = ({ t, isHero = false }: { t: TithiEvent, isHero?: boolean, key?: string }) => {
-    const isSelected = selectedTithi?.event.name === t.event.name && selectedTithi?.date === t.date;
-    const colorClass = getTithiColorClass(t.event.type);
+    const isSelected = selectedTithi?.event?.name === t.event?.name && selectedTithi?.date === t.date;
+    const eventType = (t.event?.type || 'Normal').split(',')[0].trim();
+    const colorClass = getTithiColorClass(eventType);
 
     return (
       <div className="flex flex-col gap-3">
@@ -232,13 +238,13 @@ const App: React.FC = () => {
             animate-in fade-in slide-in-from-bottom-2 duration-500
           `}
         >
-          {isHero && <LunarBackground type={t.event.type} />}
+          {isHero && <LunarBackground type={eventType} />}
 
           <div className="relative z-10 flex flex-col gap-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl shadow-inner ${isHero ? 'bg-white/10 backdrop-blur-3xl border border-white/20' : 'bg-white/[0.03]'}`}>
-                  <TithiIcon type={t.event.type} size={isHero ? "md" : "sm"} />
+                  <TithiIcon type={eventType} size={isHero ? "md" : "sm"} />
                 </div>
                 <div>
                   <h3 className={`
@@ -246,7 +252,7 @@ const App: React.FC = () => {
                     font-black bangla-font tracking-tighter leading-none mb-1
                     ${isHero ? 'text-white' : activeTheme.textMain}
                   `}>
-                    {t.event.banglaName}
+                    {t.event?.banglaName || 'সাধারণ দিন'}
                   </h3>
                   <div className={`flex items-center gap-1.5 mt-0.5 ${isHero ? 'opacity-60' : activeTheme.textMuted}`}>
                     <span className="text-[10px] font-bold bangla-font tracking-wider uppercase opacity-40">
@@ -267,9 +273,9 @@ const App: React.FC = () => {
             </div>
 
             <div className={`flex justify-between items-center gap-2 py-4 px-1 border-y ${isHero ? 'border-white/10' : 'border-white/5'}`}>
-              <TimeBlock label="আরম্ভ" isoDateTime={t.event.startDateTime} isHero={isHero} />
+              <TimeBlock label="আরম্ভ" isoDateTime={t.event?.startDateTime || ''} isHero={isHero} />
               <div className={`h-8 w-[1px] hidden sm:block ${isHero ? 'bg-white/10' : 'bg-white/5'} opacity-20`}></div>
-              <TimeBlock label="সমাপ্তি" isoDateTime={t.event.endDateTime} isEnd isHero={isHero} />
+              <TimeBlock label="সমাপ্তি" isoDateTime={t.event?.endDateTime || ''} isEnd isHero={isHero} />
             </div>
 
             {isHero && (
@@ -313,12 +319,12 @@ const App: React.FC = () => {
           </div>
 
           <div className="mt-auto mb-1 w-full flex flex-col items-center">
-            {tithiOnDay && (
+            {tithiOnDay && tithiOnDay.event && (
               <div
                 onClick={() => handleTithiClick(tithiOnDay)}
                 className="flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105 w-full"
               >
-                <TithiIcon type={tithiOnDay.event.type} size="sm" />
+                <TithiIcon type={tithiOnDay.event.type.split(',')[0].trim()} size="sm" />
                 <span className={`text-[8px] font-black bangla-font opacity-80 truncate w-full text-center ${activeTheme.textMain}`}>{tithiOnDay.event.banglaName}</span>
               </div>
             )}

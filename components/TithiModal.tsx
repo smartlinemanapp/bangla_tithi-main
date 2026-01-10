@@ -72,7 +72,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
                         <div className="flex flex-col gap-2">
                             <span className="text-[10px] font-black bangla-font uppercase tracking-tight text-[#C49B66]">বিষদ বিবরণ</span>
                             <h2 className="text-4xl font-black bangla-font tracking-tight text-white leading-tight">
-                                {tithi.event.banglaName}
+                                {tithi.event?.banglaName || 'সাধারণ দিন'}
                             </h2>
                         </div>
                         <button

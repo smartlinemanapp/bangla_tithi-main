@@ -1,7 +1,7 @@
 
 import { TithiEvent } from "../types";
 
-const CACHE_KEY = 'bangla_tithi_cache_v5';
+const CACHE_KEY = 'bangla_tithi_cache_v6';
 const LAST_SYNC_KEY = 'bangla_tithi_last_sync';
 
 export interface CachedData {
@@ -22,15 +22,18 @@ export const getCachedTithis = (): TithiEvent[] => {
 export const saveTithisToCache = (newTithis: TithiEvent[]) => {
   try {
     const existing = getCachedTithis();
-    // Merge and deduplicate based on date + name
+    // Merge and deduplicate based on date + name (or just date if no event)
     const merged = [...existing, ...newTithis];
-    const unique = Array.from(new Map(merged.map(item => [item.date + item.event.name, item])).values());
+    const unique = Array.from(new Map(merged.map(item => {
+      const key = item.event ? (item.date + item.event.name) : item.date;
+      return [key, item];
+    })).values());
 
     // Sort by date
     unique.sort((a, b) => a.date.localeCompare(b.date));
 
-    // Limit cache size to reasonable amount (e.g., 200 events) to avoid localStorage limits
-    const trimmed = unique.slice(-200);
+    // Limit cache size to reasonable amount (e.g., 500 events)
+    const trimmed = unique.slice(-500);
 
     localStorage.setItem(CACHE_KEY, JSON.stringify(trimmed));
     localStorage.setItem(LAST_SYNC_KEY, Date.now().toString());

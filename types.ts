@@ -10,7 +10,7 @@ export interface SunData {
 export interface EventDetails {
   name: string;
   banglaName: string;
-  type: 'Purnima' | 'Amavasya' | 'Pratipada' | 'Ekadashi' | 'Festival' | 'Ritual' | 'Normal' | 'Other';
+  type: string;
   description: string;
   startDateTime: string;
   endDateTime: string;
@@ -41,7 +41,7 @@ export interface TithiEvent {
   date: string;
   weekday: Weekday;
   banglaDate: JsonBanglaDate;
-  event: EventDetails;
+  event: EventDetails | null;
   sun: SunData;
 }
 
