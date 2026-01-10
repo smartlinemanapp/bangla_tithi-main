@@ -1,64 +1,76 @@
+import { supabase, isSupabaseConfigured } from './supabase';
+import { TithiEvent } from '../types';
 
-import { TithiEvent } from "../types";
+export const fetchTithisForRange = async (year: number, month: number, count: number): Promise<TithiEvent[]> => {
+    if (isSupabaseConfigured()) {
+        try {
+            const startDate = new Date(year, month - 1, 1).toISOString().split('T')[0];
+            const endDateDate = new Date(year, month - 1 + count, 0); // Last day of the range
+            const endDate = endDateDate.toISOString().split('T')[0];
 
-// Cache for loaded data
-let cachedData: TithiEvent[] | null = null;
+            console.log(`Fetching from Supabase: ${startDate} to ${endDate}`);
 
-/**
- * Load Tithi data from static JSON file
- */
-const loadStaticData = async (): Promise<TithiEvent[]> => {
-    if (cachedData) {
-        return cachedData;
+            const { data, error } = await supabase
+                .from('tithi_events')
+                .select('*')
+                .gte('date', startDate)
+                .lte('date', endDate)
+                .order('date', { ascending: true });
+
+            if (error) {
+                console.error('Supabase fetch error:', error);
+                throw error;
+            }
+
+            if (data) {
+                // Transform back to TithiEvent
+                // Supabase returns { id, date, type, data: {...} }
+                // We stored the full object in 'data' column
+                // But wait, the migration script stored:
+                // { date: t.date, type: t.event?.type, data: t }
+                // So we just need to pluck 'data'
+                return data.map((row: any) => row.data as TithiEvent);
+            }
+        } catch (e) {
+            console.error('Supabase fetch failed, falling back to static cache/data if possible', e);
+            // Fallthrough to fetch from JSON if Supabase fails? 
+            // Or just return empty to let cache handle it?
+        }
     }
 
+    // Fallback: Fetch from public/tithi.json (Legacy / Offline / Dev without Creds)
     try {
-        const response = await fetch('./tithi.json');
-        if (!response.ok) {
-            throw new Error(`Failed to load data: ${response.statusText}`);
-        }
-        cachedData = await response.json();
-        return cachedData || [];
-    } catch (error) {
-        console.error('Error loading static Tithi data:', error);
+        const response = await fetch('/tithi.json');
+        const allTithis = await response.json() as TithiEvent[];
+
+        // Filter locally
+        const startStr = `${year}-${String(month).padStart(2, '0')}`;
+        // Primitive range filter for fallback
+        // Just returning everything is fine for now as it's small, 
+        // but let's emulate the range slightly to match behavior
+        return allTithis.filter(t => t.date >= `${year}-${String(month).padStart(2, '0')}-01`);
+    } catch (e) {
+        console.error('Failed to fetch local tithi.json', e);
         return [];
     }
 };
 
-/**
- * Fetches Tithis for a range of months from static data
- */
-export const fetchTithisForRange = async (
-    startYear: number,
-    startMonth: number,
-    monthCount: number = 6
-): Promise<TithiEvent[]> => {
-    const allData = await loadStaticData();
-
-    // Calculate date range
-    const startDate = new Date(startYear, startMonth - 1, 1);
-    const endDate = new Date(startYear, startMonth - 1 + monthCount, 0);
-
-    const startStr = startDate.toISOString().split('T')[0];
-    const endStr = endDate.toISOString().split('T')[0];
-
-    // Filter data by date range using the top-level date field
-    // sorting is now done by date string directly as it is YYYY-MM-DD
-    return allData.filter(tithi => {
-        return tithi.date >= startStr && tithi.date <= endStr;
-    });
-};
-
-/**
- * Get advice/description for a specific Tithi
- * Uses the description from static data
- */
 export const getTithiAdvice = async (tithi: TithiEvent): Promise<string> => {
-    // Return the description from the nested event object
-    if (tithi.event && tithi.event.description) {
-        return tithi.event.description;
-    }
+    // Advice generation remains static/client-side for now
+    // In a real app, this could also be in the DB
+    const { event } = tithi;
+    if (!event) return "আজকের দিনটি আপনার জন্য শুভ হোক।";
 
-    // Fallback Bengali message
-    return "এই তিথি সম্পর্কে কোনো বিস্তারিত তথ্য পাওয়া যায়নি।";
+    const type = (event.type || 'Normal').split(',')[0].trim();
+
+    // Basic static advice map
+    const adviceMap: Record<string, string> = {
+        'Amavasya': "আজ অমাবস্যা। মানসিক প্রশান্তির জন্য ধ্যান বা দান করা শুভ। নতুন কোনো শুভ কাজ শুরু করা থেকে বিরত থাকুন।",
+        'Purnima': "আজ পূর্ণিমা। সত্যনারায়ণ পূজা বা কোনো শুভ কাজের জন্য দিনটি অত্যন্ত প্রশস্ত।",
+        'Ekadashi': "আজ একাদশী। উপবাস পালন শরীর ও মনের জন্য মঙ্গলজনক। চাল ও শর্করা জাতীয় খাবার বর্জনীয়।",
+        'Sankranti': "আজ সংক্রান্তি। সূর্য দেবতার আরাধনা ও দান কার্যের জন্য বিশেষ দিন।",
+        'Festival': `${event.banglaName} উপলক্ষে আপনাকে শুভেচ্ছা। পরিবারের সাথে আনন্দ ভাগ করে নিন।`
+    };
+
+    return adviceMap[type] || "আজকের দিনটি আপনার জন্য মঙ্গলময় হোক। প্রতিটি মুহূর্ত আনন্দে কাটুক।";
 };

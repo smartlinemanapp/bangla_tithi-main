@@ -67,11 +67,11 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
                         >
                             <div className={`
                                 relative transition-all duration-500 transform
-                                ${isActive ? 'text-[#C49B66] scale-110 neon-glow' : 'text-white/40 hover:text-white/60'}
+                                ${isActive ? 'text-[var(--accent-main)] scale-110 neon-glow' : 'text-white/40 hover:text-white/60'}
                             `}>
                                 {isActive ? tab.activeIcon : tab.icon}
                                 {isActive && (
-                                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[#C49B66] copper-glow"></div>
+                                    <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-[var(--accent-main)] copper-glow"></div>
                                 )}
                             </div>
                         </button>

@@ -10,6 +10,8 @@ import { BottomNav, TabType } from './components/BottomNav';
 import { M3Card } from './components/M3Card';
 import { triggerHaptic } from './utils/hapticUtils';
 import { TithiModal } from './components/TithiModal';
+import { ThemeSelector, PALETTES, ThemePalette } from './components/ThemeSelector';
+import { supabase, isSupabaseConfigured } from './services/supabase';
 
 type FilterType = 'All' | 'Purnima' | 'Amavasya' | 'Ekadashi' | 'Festival';
 
@@ -24,6 +26,11 @@ const App: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [upcomingPage, setUpcomingPage] = useState(0);
   const [activeTab, setActiveTab] = useState<TabType>('home');
+  const [currentPalette, setCurrentPalette] = useState<ThemePalette>(() => {
+    const saved = localStorage.getItem('bangla_tithi_palette');
+    return saved ? JSON.parse(saved) : PALETTES[0];
+  });
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
 
   const todayStr = useMemo(() => {
     const now = new Date();
@@ -74,6 +81,25 @@ const App: React.FC = () => {
     }
 
     syncData();
+
+    // Real-time Subscription (Listen for DB changes)
+    if (isSupabaseConfigured()) {
+      const channel = supabase
+        .channel('tithi_changes')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'tithi_events' },
+          (payload) => {
+            console.log('Real-time change detected:', payload);
+            syncData(true); // Force silent refresh
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [syncData]);
 
   useEffect(() => {
@@ -82,7 +108,19 @@ const App: React.FC = () => {
     if (metaThemeColor) {
       metaThemeColor.setAttribute('content', '#FFFBF0');
     }
-  }, []);
+
+    // Apply Palette to CSS Variables
+    const root = document.documentElement;
+    root.style.setProperty('--accent-main', currentPalette.main);
+    root.style.setProperty('--accent-light', currentPalette.light);
+    root.style.setProperty('--accent-dark', currentPalette.dark);
+    root.style.setProperty('--accent-glow', currentPalette.glow);
+    root.style.setProperty('--accent-glow-subtle', currentPalette.glowSubtle);
+    root.style.setProperty('--accent-secondary', currentPalette.secondary);
+    root.style.setProperty('--accent-secondary-glow', currentPalette.secondaryGlow);
+
+    localStorage.setItem('bangla_tithi_palette', JSON.stringify(currentPalette));
+  }, [currentPalette]);
 
   // Ensure tithis are always sorted chronologically by date
   const sortedTithis = useMemo(() => {
@@ -173,20 +211,20 @@ const App: React.FC = () => {
     header: 'bg-[#050505]/90 border-[#1A1A1A] text-white',
     textMain: 'text-[#E0E0E0]',
     textMuted: 'text-[#888888]',
-    textAccent: 'text-[#C49B66]',
+    textAccent: 'text-[var(--accent-main)]',
     card: 'bg-[#121212] border-[#1A1A1A] hover:border-[#333333] shadow-2xl',
-    secondary: 'bg-[#FF2E63]',
+    secondary: 'bg-[var(--accent-secondary)]',
   };
 
   const getTithiColorClass = (type: string) => {
     const primaryType = type.split(',')[0].trim();
     switch (primaryType) {
-      case 'Festival': return 'from-red-100 to-orange-200 border-red-300 text-red-950';
-      case 'Purnima': return 'from-amber-100 to-yellow-200 border-amber-300 text-amber-950';
-      case 'Amavasya': return 'from-slate-700 to-slate-900 border-slate-600 text-white';
-      case 'Ekadashi': return 'from-orange-100 to-orange-200 border-orange-300 text-orange-950';
-      case 'Pratipada': return 'from-emerald-100 to-emerald-200 border-emerald-300 text-emerald-950';
-      default: return 'from-sky-100 to-indigo-200 border-indigo-300 text-indigo-950';
+      case 'Festival': return 'from-[var(--accent-secondary)]/20 to-[var(--accent-main)]/20 border-[var(--accent-secondary)]/30 text-white';
+      case 'Purnima': return 'from-[var(--accent-main)]/30 to-[var(--accent-light)]/20 border-[var(--accent-main)]/30 text-white';
+      case 'Amavasya': return 'from-slate-900/90 to-black border-white/5 text-white/80';
+      case 'Ekadashi': return 'from-[var(--accent-main)]/20 to-white/5 border-[var(--accent-main)]/20 text-white';
+      case 'Pratipada': return 'from-[var(--accent-secondary)]/10 to-transparent border-[var(--accent-secondary)]/10 text-white/90';
+      default: return 'from-white/5 to-transparent border-white/10 text-white/80';
     }
   };
 
@@ -234,7 +272,7 @@ const App: React.FC = () => {
           className={`
             relative group p-6 overflow-hidden border-none 
             transition-all duration-500 hover:scale-[1.01] active:scale-[0.98]
-            ${isHero ? `cred-hero-card ${colorClass}` : `${activeTheme.card} ${isSelected ? 'ring-2 ring-[#C49B66]/20 shadow-lg' : 'hover:shadow-md'}`}
+            ${isHero ? `cred-hero-card ${colorClass}` : `${activeTheme.card} ${isSelected ? 'ring-2 ring-[var(--accent-main)]/20 shadow-lg' : 'hover:shadow-md'}`}
             animate-in fade-in slide-in-from-bottom-2 duration-500
           `}
         >
@@ -252,7 +290,7 @@ const App: React.FC = () => {
                     font-black bangla-font tracking-tighter leading-none mb-1
                     ${isHero ? 'text-white' : activeTheme.textMain}
                   `}>
-                    {t.event?.banglaName || 'সাধারণ দিন'}
+                    {t.event?.banglaName || (t.date === todayStr ? 'আজ কোন বিশেষ তিথি নেই' : 'কোন বিশেষ তিথি নেই')}
                   </h3>
                   <div className={`flex items-center gap-1.5 mt-0.5 ${isHero ? 'opacity-60' : activeTheme.textMuted}`}>
                     <span className="text-[10px] font-bold bangla-font tracking-wider uppercase opacity-40">
@@ -281,7 +319,7 @@ const App: React.FC = () => {
             {isHero && (
               <button
                 onClick={(e) => { e.stopPropagation(); triggerHaptic('medium'); alert('রিমাইন্ডার সেট করা হয়েছে (Demo)'); }}
-                className="w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-[#C49B66] text-black hover:bg-[#D4AB76] shadow-xl copper-glow"
+                className="w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-[var(--accent-main)] text-black hover:opacity-90 shadow-xl copper-glow"
               >
                 Set Reminder
               </button>
@@ -310,7 +348,7 @@ const App: React.FC = () => {
       const bDateInfo = getBanglaDate(new Date(year, month, d));
 
       days.push(
-        <div key={d} className={`h-28 border-r border-b p-1.5 transition-all hover:bg-white/[0.02] relative flex flex-col items-center border-white/[0.02] ${isToday ? 'bg-[#C49B66]/5' : ''} ${((firstDay + d) % 7 === 0) ? 'border-r-0' : ''}`}>
+        <div key={d} className={`h-28 border-r border-b p-1.5 transition-all hover:bg-white/[0.02] relative flex flex-col items-center border-white/[0.02] ${isToday ? 'bg-[var(--accent-main)]/5' : ''} ${((firstDay + d) % 7 === 0) ? 'border-r-0' : ''}`}>
           <div className="flex flex-col items-center gap-0.5 pt-1">
             <span className={`text-[10px] font-black opacity-30 ${activeTheme.textMain}`}>{d}</span>
             <span className={`text-lg font-black bangla-font ${isToday ? activeTheme.textAccent : activeTheme.textMain} tracking-tight leading-none`}>
@@ -357,7 +395,7 @@ const App: React.FC = () => {
             }}
             className={`flex items-center gap-2 px-4 py-2 rounded-full border whitespace-nowrap transition-all duration-300 ${activeFilter === f.val
               ? `${activeTheme.secondary} text-white border-transparent shadow-lg scale-105`
-              : `bg-white/40 ${activeTheme.textMain} border-current/10 hover:border-current/30`}`}
+              : `bg-white/5 ${activeTheme.textMain} border-white/5 hover:border-white/20`}`}
           >
             <span className="text-[10px] opacity-70">{f.icon}</span>
             <span className="text-xs font-black bangla-font tracking-tight">{f.label}</span>
@@ -373,7 +411,7 @@ const App: React.FC = () => {
       <header className={`backdrop-blur-xl border-b p-5 sticky top-0 z-50 transition-all duration-500 ${activeTheme.header} safe-top`}>
         <div className="max-w-3xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-orange-500/10">
+            <div className="p-2 rounded-xl bg-[var(--accent-main)]/10">
               <svg className={`w-6 h-6 ${activeTheme.textAccent}`} fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
             </div>
             <div className="relative">
@@ -385,6 +423,18 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                triggerHaptic('selection');
+                setIsThemeOpen(true);
+              }}
+              className="p-3 rounded-2xl bg-white/5 border border-white/5 active:scale-90 transition-all shadow-xl"
+              title="Change Theme Color"
+            >
+              <svg className="w-5 h-5 text-[var(--accent-main)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.828 2.828a2 2 0 010 2.828l-8.486 8.486M7 7L4 10" />
+              </svg>
+            </button>
           </div>
         </div>
       </header>
@@ -402,7 +452,7 @@ const App: React.FC = () => {
               <div className="relative z-10 flex flex-col gap-10">
                 <div className="flex justify-between items-start">
                   <div className="flex flex-col gap-1">
-                    <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-[#C49B66] mb-3">Today's Panjika</h2>
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-[var(--accent-main)] mb-3">Today's Panjika</h2>
                     <div className="flex flex-col">
                       <span className="text-6xl font-black tracking-tighter leading-none mb-2">
                         {todayLabel.formatted.split('/')[0]} {ENGLISH_MONTHS_BN[new Date().getMonth()]}
@@ -410,13 +460,13 @@ const App: React.FC = () => {
                       <span className="text-xl font-medium text-white/50 tracking-wide">{todayLabel.dayName} • {toBengaliNumber(new Date().getFullYear().toString())}</span>
                     </div>
                   </div>
-                  <div className="px-4 py-2 bg-white/5 backdrop-blur-3xl rounded-full border border-white/5 text-[11px] font-black bangla-font tracking-tight text-[#C49B66]">আজকের দিন</div>
+                  <div className="px-4 py-2 bg-white/5 backdrop-blur-3xl rounded-full border border-white/5 text-[11px] font-black bangla-font tracking-tight text-[var(--accent-main)]">আজকের দিন</div>
                 </div>
 
                 <div className="flex items-center gap-6 py-6 border-t border-white/5 mt-4">
                   <div className="flex-1 flex flex-col items-center p-4 rounded-3xl bg-white/[0.02] border border-white/[0.03]">
                     <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Bangla Date</span>
-                    <span className="text-xl font-black text-[#C49B66]">
+                    <span className="text-xl font-black text-[var(--accent-main)]">
                       {(() => {
                         const b = getBanglaDate(new Date());
                         return `${toBengaliNumber(b.day)} ${BANGLA_MONTHS_BN[b.monthIndex]}`;
@@ -425,7 +475,7 @@ const App: React.FC = () => {
                   </div>
                   <div className="flex-1 flex flex-col items-center p-4 rounded-3xl bg-white/[0.02] border border-white/[0.03]">
                     <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Bangla Year</span>
-                    <span className="text-xl font-black text-[#C49B66]">
+                    <span className="text-xl font-black text-[var(--accent-main)]">
                       {toBengaliNumber(getBanglaDate(new Date()).year.toString())}
                     </span>
                   </div>
@@ -436,7 +486,7 @@ const App: React.FC = () => {
             {/* 2. Today's Tithi Special Card (If exists) */}
             <section>
               <div className="flex items-center justify-between mb-4 px-1">
-                <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>আজকের বিশেষ তিথি</h2>
+                <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>আজকের তিথি</h2>
                 {!todayTithi && <span className="text-[9px] font-black bangla-font opacity-40 uppercase tracking-widest pt-1">কোনো বিশেষ তিথি নেই</span>}
               </div>
 
@@ -445,9 +495,9 @@ const App: React.FC = () => {
                   <CompactTithiCard t={todayTithi} isHero />
                 </div>
               ) : (
-                <M3Card variant="outlined" className="p-6 border-dashed flex items-center gap-4 bg-gray-50/50">
-                  <div className="p-3 rounded-full bg-gray-100">
-                    <svg className="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                <M3Card variant="outlined" className="p-6 border-dashed flex items-center gap-4 bg-white/[0.02] border-white/10">
+                  <div className="p-3 rounded-full bg-[var(--accent-main)]/10">
+                    <svg className="w-5 h-5 text-[var(--accent-main)] opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                   </div>
                   <p className="text-xs font-bold bangla-font opacity-50 flex-1">আজকের দিনটি সাধারণ ক্যালেন্ডার অনুযায়ী পালন করুন।</p>
                 </M3Card>
@@ -462,9 +512,9 @@ const App: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
-                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#C49B66]/5 rounded-full blur-2xl group-hover:bg-[#C49B66]/10 transition-all"></div>
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-main)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-main)]/10 transition-all"></div>
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66] flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C49B66] copper-glow"></span> RAW SUNRISE
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-main)] copper-glow"></span> RAW SUNRISE
                   </span>
                   <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
                     {todayTithi?.sun.sunrise || "০৬:২০"}
@@ -473,9 +523,9 @@ const App: React.FC = () => {
                 </div>
 
                 <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
-                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#FF2E63]/5 rounded-full blur-2xl group-hover:bg-[#FF2E63]/10 transition-all"></div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#FF2E63] flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E63] neon-glow"></span> DUSK CALC
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-secondary)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-secondary)]/10 transition-all"></div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--accent-secondary)] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-secondary)] neon-glow"></span> DUSK CALC
                   </span>
                   <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
                     {todayTithi?.sun.sunset || "১৭:১৭"}
@@ -504,7 +554,7 @@ const App: React.FC = () => {
                 </button>
               </div>
               <div className="flex flex-col gap-3">
-                {sortedTithis.filter(t => t.date > todayStr).slice(0, 1).map((t, i) => (
+                {sortedTithis.filter(t => t.date > todayStr && t.event).slice(0, 1).map((t, i) => (
                   <CompactTithiCard key={i} t={t} />
                 ))}
               </div>
@@ -517,7 +567,7 @@ const App: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className={`w-1.5 h-6 rounded-full bg-[#C49B66] shadow-md copper-glow`}></div>
+                <div className={`w-1.5 h-6 rounded-full bg-[var(--accent-main)] shadow-md copper-glow`}></div>
                 <h2 className={`text-xl font-black bangla-font ${activeTheme.textMain}`}>মাসিক ক্যালেন্ডার</h2>
               </div>
             </div>
@@ -543,7 +593,7 @@ const App: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className={`w-1.5 h-6 rounded-full bg-[#C49B66] shadow-md copper-glow`}></div>
+                <div className={`w-1.5 h-6 rounded-full bg-[var(--accent-main)] shadow-md copper-glow`}></div>
                 <h2 className={`text-xl font-black bangla-font ${activeTheme.textMain}`}>
                   {activeFilter === 'All' ? 'আসন্ন বিশেষ দিনসমূহ' : `আসন্ন ${activeFilter === 'Festival' ? 'উৎসব' : activeFilter === 'Purnima' ? 'পূর্ণিমা' : activeFilter === 'Amavasya' ? 'অমাবস্যা' : activeFilter === 'Ekadashi' ? 'একাদশী' : activeFilter}`}
                 </h2>
@@ -601,6 +651,16 @@ const App: React.FC = () => {
       )}
 
       {/* Professional Tithi Detail Modal */}
+      <ThemeSelector
+        isOpen={isThemeOpen}
+        onClose={() => setIsThemeOpen(false)}
+        currentTheme={currentPalette.name}
+        onSelect={(p) => {
+          setCurrentPalette(p);
+          setIsThemeOpen(false);
+        }}
+      />
+
       <TithiModal
         tithi={selectedTithi}
         isOpen={!!selectedTithi}
