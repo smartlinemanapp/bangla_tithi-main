@@ -38,8 +38,8 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({ isOpen, onClose, onS
     };
 
     const handleBuy = () => {
-        // Replace with your actual Gumroad product link
-        window.open('https://dipankar.gumroad.com/l/bangla-tithi-premium', '_blank');
+        // Replace with your actual Razorpay Payment Page URL
+        window.open('https://rzp.io/l/placeholder', '_blank');
     };
 
     return createPortal(
@@ -74,7 +74,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({ isOpen, onClose, onS
                                 type="text"
                                 value={key}
                                 onChange={(e) => setKey(e.target.value)}
-                                placeholder="Enter License Key (e.g. ABCD-1234)"
+                                placeholder="Enter Promo Code (e.g. BANGLA_PRO)"
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center text-white font-mono text-sm placeholder:text-white/20 focus:outline-none focus:border-[var(--accent-main)]/50 focus:ring-1 focus:ring-[var(--accent-main)]/50 transition-all"
                             />
                         </div>
