@@ -1,0 +1,730 @@
+[
+    {
+        "date": "2026-01-14",
+        "weekday": {
+            "en": "Wednesday",
+            "bn": "বুধবার"
+        },
+        "banglaDate": {
+            "month": "পৌষ",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "একাদশী",
+            "tithiType": "Ekadashi"
+        },
+        "event": {
+            "name": "Shattila Ekadashi",
+            "banglaName": "ষটতিলা একাদশী",
+            "type": "Ekadashi",
+            "description": "পাপমুক্তির কামনায় তিল দান ও একাদশী উপবাস বিহিত।",
+            "startDateTime": "2026-01-13T15:17:00+05:30",
+            "endDateTime": "2026-01-14T17:52:00+05:30"
+        },
+        "sun": {
+            "sunrise": "06:20",
+            "sunset": "17:17",
+            "dayLength": "10h 57m",
+            "nightLength": "13h 03m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-01-23",
+        "weekday": {
+            "en": "Friday",
+            "bn": "শুক্রবার"
+        },
+        "banglaDate": {
+            "month": "মাঘ",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পঞ্চমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Saraswati Puja",
+            "banglaName": "সরস্বতী পূজা (শ্রীপঞ্চমী)",
+            "type": "Festival",
+            "description": "বিদ্যাদেবী সরস্বতীর আরাধনা ও শিশুদের হাতেখড়ি।",
+            "startDateTime": "2026-01-23T02:28:00+05:30",
+            "endDateTime": "2026-01-24T01:46:00+05:30"
+        },
+        "sun": {
+            "sunrise": "06:19",
+            "sunset": "17:24",
+            "dayLength": "11h 05m",
+            "nightLength": "12h 55m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-02-15",
+        "weekday": {
+            "en": "Sunday",
+            "bn": "রবিবার"
+        },
+        "banglaDate": {
+            "month": "মাঘ",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "চতুর্দশী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Maha Shivaratri",
+            "banglaName": "মহা শিবরাত্রি",
+            "type": "Festival",
+            "description": "শিবলিঙ্গে জলদান ও সারারাত উপবাস পালন।",
+            "startDateTime": "2026-02-15T06:08:00+05:30",
+            "endDateTime": "2026-02-16T05:50:00+05:30"
+        },
+        "sun": {
+            "sunrise": "06:08",
+            "sunset": "17:40",
+            "dayLength": "11h 32m",
+            "nightLength": "12h 28m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-03-03",
+        "weekday": {
+            "en": "Tuesday",
+            "bn": "মঙ্গলবার"
+        },
+        "banglaDate": {
+            "month": "ফালগুন",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Dol Jatra (Holi)",
+            "banglaName": "দোল যাত্রা / হোলি",
+            "type": "Festival",
+            "description": "শ্রীকৃষ্ণের দোল উৎসব ও মহাপ্রভুর আবির্ভাব তিথি।",
+            "startDateTime": "2026-03-02T19:25:00+05:30",
+            "endDateTime": "2026-03-03T18:40:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:55",
+            "sunset": "17:49",
+            "dayLength": "11h 54m",
+            "nightLength": "12h 06m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-04-15",
+        "weekday": {
+            "en": "Wednesday",
+            "bn": "বুধবার"
+        },
+        "banglaDate": {
+            "month": "বৈশাখ",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "ত্রয়োদশী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Bengali New Year",
+            "banglaName": "পহেলা বৈশাখ (শুভ নববর্ষ ১৪৩৩)",
+            "type": "Festival",
+            "description": "বাংলা নববর্ষের সূচনা ও হালখাতা উৎসব।",
+            "startDateTime": "2026-04-15T00:00:00+05:30",
+            "endDateTime": "2026-04-15T23:59:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:18",
+            "sunset": "18:02",
+            "dayLength": "12h 44m",
+            "nightLength": "11h 16m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-06-16",
+        "weekday": {
+            "en": "Tuesday",
+            "bn": "মঙ্গলবার"
+        },
+        "banglaDate": {
+            "month": "আষাঢ়",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "দ্বিতীয়া",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Ratha Yatra",
+            "banglaName": "রথযাত্রা",
+            "type": "Festival",
+            "description": "জগন্নাথ দেবের রথযাত্রা উৎসব। রথের রশিতে টান দেওয়া।",
+            "startDateTime": "2026-06-16T04:52:00+05:30",
+            "endDateTime": "2026-06-16T18:25:00+05:30"
+        },
+        "sun": {
+            "sunrise": "04:52",
+            "sunset": "18:24",
+            "dayLength": "13h 32m",
+            "nightLength": "10h 28m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-10-10",
+        "weekday": {
+            "en": "Saturday",
+            "bn": "শনিবার"
+        },
+        "banglaDate": {
+            "month": "আশ্বিন",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "অমাবস্যা",
+            "tithiType": "Amavasya"
+        },
+        "event": {
+            "name": "Mahalaya",
+            "banglaName": "মহালয়া",
+            "type": "Amavasya",
+            "description": "পিতৃপক্ষের অবসান ও দেবীপক্ষের সূচনা। তর্পণ করার দিন।",
+            "startDateTime": "2026-10-10T05:34:00+05:30",
+            "endDateTime": "2026-10-11T04:20:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:33",
+            "sunset": "17:16",
+            "dayLength": "11h 43m",
+            "nightLength": "12h 17m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-10-18",
+        "weekday": {
+            "en": "Sunday",
+            "bn": "রবিবার"
+        },
+        "banglaDate": {
+            "month": "আশ্বিন",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "অষ্টমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Maha Ashtami",
+            "banglaName": "মহা অষ্টমী ও সন্ধিপূজা",
+            "type": "Festival",
+            "description": "দুর্গাপূজার প্রধান দিন। পুষ্পাঞ্জলি ও সন্ধিপূজা অনুষ্ঠিত হয়।",
+            "startDateTime": "2026-10-18T05:37:00+05:30",
+            "endDateTime": "2026-10-18T23:59:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:37",
+            "sunset": "17:08",
+            "dayLength": "11h 31m",
+            "nightLength": "12h 29m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-11-08",
+        "weekday": {
+            "en": "Sunday",
+            "bn": "রবিবার"
+        },
+        "banglaDate": {
+            "month": "কার্তিক",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "অমাবস্যা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Kali Puja & Diwali",
+            "banglaName": "শ্যামা পূজা ও দীপাবলি",
+            "type": "Festival",
+            "description": "দেবী কালীর আরাধনা ও আলোকসজ্জার উৎসব।",
+            "startDateTime": "2026-11-08T18:15:00+05:30",
+            "endDateTime": "2026-11-09T17:40:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:51",
+            "sunset": "16:54",
+            "dayLength": "11h 03m",
+            "nightLength": "12h 57m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2026-11-24",
+        "weekday": {
+            "en": "Tuesday",
+            "bn": "মঙ্গলবার"
+        },
+        "banglaDate": {
+            "month": "অগ্রহায়ণ",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Kartika Purnima (Rash)",
+            "banglaName": "রাস পূর্ণিমা",
+            "type": "Festival",
+            "description": "শ্রীকৃষ্ণের রাস উৎসব ও গঙ্গাস্নানের পুণ্য তিথি।",
+            "startDateTime": "2026-11-23T20:10:00+05:30",
+            "endDateTime": "2026-11-24T21:45:00+05:30"
+        },
+        "sun": {
+            "sunrise": "06:03",
+            "sunset": "16:51",
+            "dayLength": "10h 48m",
+            "nightLength": "13h 12m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-02-11",
+        "weekday": {
+            "en": "Thursday",
+            "bn": "বৃহস্পতিবার"
+        },
+        "banglaDate": {
+            "month": "মাঘ",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পঞ্চমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Saraswati Puja",
+            "banglaName": "সরস্বতী পূজা (শ্রীপঞ্চমী)",
+            "type": "Festival",
+            "description": "বসন্ত পঞ্চমী তিথিতে বিদ্যাদেবীর আরাধনা।",
+            "startDateTime": "2027-02-11T06:12:00+05:30",
+            "endDateTime": "2027-02-12T05:30:00+05:30"
+        },
+        "sun": {
+            "sunrise": "06:10",
+            "sunset": "17:38",
+            "dayLength": "11h 28m",
+            "nightLength": "12h 32m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-03-06",
+        "weekday": {
+            "en": "Saturday",
+            "bn": "শনিবার"
+        },
+        "banglaDate": {
+            "month": "ফালগুন",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "চতুর্দশী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Maha Shivaratri",
+            "banglaName": "মহা শিবরাত্রি",
+            "type": "Festival",
+            "description": "শিব চতুর্দশী ব্রত ও মহাদেবের পূজা।",
+            "startDateTime": "2027-03-06T11:45:00+05:30",
+            "endDateTime": "2027-03-07T10:15:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:53",
+            "sunset": "17:51",
+            "dayLength": "11h 58m",
+            "nightLength": "12h 02m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-03-22",
+        "weekday": {
+            "en": "Monday",
+            "bn": "সোমবার"
+        },
+        "banglaDate": {
+            "month": "চৈত্র",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Dol Jatra (Holi)",
+            "banglaName": "দোল যাত্রা / হোলি",
+            "type": "Festival",
+            "description": "ফালগুনী পূর্ণিমায় শ্রীকৃষ্ণের দোল উৎসব।",
+            "startDateTime": "2027-03-21T21:10:00+05:30",
+            "endDateTime": "2027-03-22T22:30:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:41",
+            "sunset": "17:54",
+            "dayLength": "12h 13m",
+            "nightLength": "11h 47m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-04-15",
+        "weekday": {
+            "en": "Thursday",
+            "bn": "বৃহস্পতিবার"
+        },
+        "banglaDate": {
+            "month": "বৈশাখ",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "নবমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Bengali New Year",
+            "banglaName": "পহেলা বৈশাখ (শুভ নববর্ষ ১৪৩৪)",
+            "type": "Festival",
+            "description": "নতুন বাংলা বছরের সূচনা। শুভ নববর্ষ।",
+            "startDateTime": "2027-04-15T00:00:00+05:30",
+            "endDateTime": "2027-04-15T23:59:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:18",
+            "sunset": "18:02",
+            "dayLength": "12h 44m",
+            "nightLength": "11h 16m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-07-05",
+        "weekday": {
+            "en": "Monday",
+            "bn": "সোমবার"
+        },
+        "banglaDate": {
+            "month": "আষাঢ়",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "দ্বিতীয়া",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Ratha Yatra",
+            "banglaName": "রথযাত্রা",
+            "type": "Festival",
+            "description": "জগন্নাথ দেবের রথযাত্রা উৎসব। মাসির বাড়িতে যাত্রা শুরু।",
+            "startDateTime": "2027-07-05T05:03:00+05:30",
+            "endDateTime": "2027-07-06T04:15:00+05:30"
+        },
+        "sun": {
+            "sunrise": "04:56",
+            "sunset": "18:25",
+            "dayLength": "13h 29m",
+            "nightLength": "10h 31m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-07-18",
+        "weekday": {
+            "en": "Sunday",
+            "bn": "রবিবার"
+        },
+        "banglaDate": {
+            "month": "আষাঢ়",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Purnima"
+        },
+        "event": {
+            "name": "Guru Purnima",
+            "banglaName": "গুরু পূর্ণিমা (ব্যাস পূর্ণিমা)",
+            "type": "Purnima",
+            "description": "গুরু আরাধনা ও আধ্যাত্মিক দীক্ষার জন্য প্রশস্ত দিন।",
+            "startDateTime": "2027-07-17T20:45:00+05:30",
+            "endDateTime": "2027-07-18T21:20:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:01",
+            "sunset": "18:24",
+            "dayLength": "13h 23m",
+            "nightLength": "10h 37m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-08-16",
+        "weekday": {
+            "en": "Monday",
+            "bn": "সোমবার"
+        },
+        "banglaDate": {
+            "month": "শ্রাবণ",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Raksha Bandhan",
+            "banglaName": "রাখী পূর্ণিমা ও ঝুলন সমাপন",
+            "type": "Festival",
+            "description": "ভাই-বোনের রাখি বন্ধন এবং ঝুলন যাত্রার সমাপ্তি।",
+            "startDateTime": "2027-08-15T19:30:00+05:30",
+            "endDateTime": "2027-08-16T18:45:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:14",
+            "sunset": "18:11",
+            "dayLength": "12h 57m",
+            "nightLength": "11h 03m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-08-25",
+        "weekday": {
+            "en": "Wednesday",
+            "bn": "বুধবার"
+        },
+        "banglaDate": {
+            "month": "ভাদ্র",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "অষ্টমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Janmashtami",
+            "banglaName": "শ্রীকৃষ্ণের জন্মাষ্টমী",
+            "type": "Festival",
+            "description": "ভগবান শ্রীকৃষ্ণের আবির্ভাব তিথি ও উপবাস পালন।",
+            "startDateTime": "2027-08-24T22:10:00+05:30",
+            "endDateTime": "2027-08-25T21:40:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:17",
+            "sunset": "18:04",
+            "dayLength": "12h 47m",
+            "nightLength": "11h 13m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-09-30",
+        "weekday": {
+            "en": "Thursday",
+            "bn": "বৃহস্পতিবার"
+        },
+        "banglaDate": {
+            "month": "আশ্বিন",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "অমাবস্যা",
+            "tithiType": "Amavasya"
+        },
+        "event": {
+            "name": "Mahalaya",
+            "banglaName": "মহালয়া (পিতৃতর্পণ)",
+            "type": "Amavasya",
+            "description": "পিতৃপক্ষের সমাপ্তি ও দেবীপক্ষের সূচনা। গঙ্গাতীরে তর্পণ।",
+            "startDateTime": "2027-09-29T16:15:00+05:30",
+            "endDateTime": "2027-09-30T17:40:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:28",
+            "sunset": "17:26",
+            "dayLength": "11h 58m",
+            "nightLength": "12h 02m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-10-07",
+        "weekday": {
+            "en": "Thursday",
+            "bn": "বৃহস্পতিবার"
+        },
+        "banglaDate": {
+            "month": "আশ্বিন",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "অষ্টমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Maha Ashtami",
+            "banglaName": "মহা অষ্টমী ও সন্ধিপূজা",
+            "type": "Festival",
+            "description": "শারদীয়া দুর্গাপূজার প্রধান দিন। পুষ্পাঞ্জলি ও সন্ধিপূজা বিহিত।",
+            "startDateTime": "2027-10-07T05:33:00+05:30",
+            "endDateTime": "2027-10-07T23:59:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:32",
+            "sunset": "17:19",
+            "dayLength": "11h 47m",
+            "nightLength": "12h 13m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-10-10",
+        "weekday": {
+            "en": "Sunday",
+            "bn": "রবিবার"
+        },
+        "banglaDate": {
+            "month": "আশ্বিন",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "দশমী",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Vijaya Dashami",
+            "banglaName": "বিজয়া দশমী",
+            "type": "Festival",
+            "description": "প্রতিমা বিসর্জন, সিঁদুর খেলা ও বড়দের প্রণাম করার দিন।",
+            "startDateTime": "2027-10-10T05:34:00+05:30",
+            "endDateTime": "2027-10-10T15:20:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:33",
+            "sunset": "17:16",
+            "dayLength": "11h 43m",
+            "nightLength": "12h 17m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-10-15",
+        "weekday": {
+            "en": "Friday",
+            "bn": "শুক্রবার"
+        },
+        "banglaDate": {
+            "month": "আশ্বিন",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Kojagari Lakshmi Puja",
+            "banglaName": "কোজাগরী লক্ষ্মী পূজা",
+            "type": "Festival",
+            "description": "শারদীয়া পূর্ণিমায় ঘরে ঘরে ধনদেবী লক্ষ্মীর আরাধনা।",
+            "startDateTime": "2027-10-14T19:45:00+05:30",
+            "endDateTime": "2027-10-15T21:10:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:36",
+            "sunset": "17:11",
+            "dayLength": "11h 35m",
+            "nightLength": "12h 25m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-10-29",
+        "weekday": {
+            "en": "Friday",
+            "bn": "শুক্রবার"
+        },
+        "banglaDate": {
+            "month": "কার্তিক",
+            "paksha": "কৃষ্ণপক্ষ",
+            "tithi": "অমাবস্যা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Kali Puja & Diwali",
+            "banglaName": "কালী পূজা ও দীপাবলি",
+            "type": "Festival",
+            "description": "শ্যামা পূজা ও আলোকসজ্জার উৎসব। প্রদীপ প্রজ্জ্বলন।",
+            "startDateTime": "2027-10-29T10:30:00+05:30",
+            "endDateTime": "2027-10-30T09:15:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:44",
+            "sunset": "17:01",
+            "dayLength": "11h 17m",
+            "nightLength": "12h 43m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-10-31",
+        "weekday": {
+            "en": "Sunday",
+            "bn": "রবিবার"
+        },
+        "banglaDate": {
+            "month": "কার্তিক",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "দ্বিতীয়া",
+            "tithiType": "Ritual"
+        },
+        "event": {
+            "name": "Bhai Phonta",
+            "banglaName": "ভাই ফোঁটা (ভাত্রীদ্বিতীয়া)",
+            "type": "Ritual",
+            "description": "ভাইয়ের মঙ্গল কামনায় বোনের আশীর্বাদ ও ফোঁটা প্রদান।",
+            "startDateTime": "2027-10-31T00:00:00+05:30",
+            "endDateTime": "2027-10-31T23:59:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:45",
+            "sunset": "16:59",
+            "dayLength": "11h 14m",
+            "nightLength": "12h 46m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-11-13",
+        "weekday": {
+            "en": "Saturday",
+            "bn": "শনিবার"
+        },
+        "banglaDate": {
+            "month": "কার্তিক",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "পূর্ণিমা",
+            "tithiType": "Festival"
+        },
+        "event": {
+            "name": "Raas Jatra / Kartika Purnima",
+            "banglaName": "রাস যাত্রা ও কার্তিক পূর্ণিমা",
+            "type": "Festival",
+            "description": "শ্রীকৃষ্ণের রাস উৎসব ও গঙ্গাস্নানের পুণ্য তিথি।",
+            "startDateTime": "2027-11-12T23:45:00+05:30",
+            "endDateTime": "2027-11-14T01:10:00+05:30"
+        },
+        "sun": {
+            "sunrise": "05:54",
+            "sunset": "16:52",
+            "dayLength": "10h 58m",
+            "nightLength": "13h 02m",
+            "reference": "Kolkata"
+        }
+    },
+    {
+        "date": "2027-12-09",
+        "weekday": {
+            "en": "Thursday",
+            "bn": "বৃহস্পতিবার"
+        },
+        "banglaDate": {
+            "month": "অগ্রহায়ণ",
+            "paksha": "শুক্লপক্ষ",
+            "tithi": "একাদশী",
+            "tithiType": "Ekadashi"
+        },
+        "event": {
+            "name": "Mokshada Ekadashi / Gita Jayanti",
+            "banglaName": "মোক্ষদা একাদশী ও গীতা জয়ন্তী",
+            "type": "Ekadashi",
+            "description": "গীতা পাঠ ও ভগবান বিষ্ণুর পূজা। একাদশী উপবাস বিহিত।",
+            "startDateTime": "2027-12-08T14:20:00+05:30",
+            "endDateTime": "2027-12-09T13:45:00+05:30"
+        },
+        "sun": {
+            "sunrise": "06:12",
+            "sunset": "16:53",
+            "dayLength": "10h 41m",
+            "nightLength": "13h 19m",
+            "reference": "Kolkata"
+        }
+    }
+]

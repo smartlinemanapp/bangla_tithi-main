@@ -1,4 +1,3 @@
-
 :root {
   /* Dynamic M3 Base Transitions */
   --m3-easing-standard: cubic-bezier(0.2, 0, 0, 1);
@@ -7,68 +6,84 @@
   --m3-duration-medium: 400ms;
   --m3-duration-long: 700ms;
 
-  /* Default (Saffron) Tonal Palette */
-  --md-sys-color-primary: #8F4E00;
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #FFDCC3;
-  --md-sys-color-on-primary-container: #2E1500;
-  --md-sys-color-secondary: #745A45;
-  --md-sys-color-on-secondary: #FFFFFF;
-  --md-sys-color-surface: #FFF8F5;
-  --md-sys-color-on-surface: #221A15;
-  --md-sys-color-outline: #83746A;
-  --md-sys-color-surface-variant: #F2DFD1;
+  /* CRED Modern Dark Palette */
+  --cred-nero: #050505;
+  --cred-onyx: #121212;
+  --cred-graphite: #1A1A1A;
+  --cred-copper: #C49B66;
+  --cred-crimson: #FF2E63;
+  --cred-glass: rgba(255, 255, 255, 0.03);
+  --cred-glass-border: rgba(255, 255, 255, 0.08);
+
+  --md-sys-color-primary: var(--cred-copper);
+  --md-sys-color-on-primary: #000000;
+  --md-sys-color-secondary: var(--cred-crimson);
+  --md-sys-color-surface: var(--cred-nero);
+  --md-sys-color-on-surface: #E0E0E0;
+  --md-sys-color-outline: #333333;
+  --md-sys-color-surface-variant: var(--cred-onyx);
 }
 
-/* Theme overrides */
-.theme-midnight {
-  --md-sys-color-primary: #D0BCFF;
-  --md-sys-color-on-primary: #381E72;
-  --md-sys-color-primary-container: #4F378B;
-  --md-sys-color-on-primary-container: #EADDFF;
-  --md-sys-color-secondary: #CCC2DC;
-  --md-sys-color-on-secondary: #332D41;
-  --md-sys-color-surface: #1C1B1F;
-  --md-sys-color-on-surface: #E6E1E5;
-  --md-sys-color-outline: #938F99;
-  --md-sys-color-surface-variant: #49454F;
+/* Background Pattern (Deep Modern Grid) */
+body {
+  background-color: var(--cred-nero);
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-attachment: fixed;
+  color: #FFFFFF;
 }
 
-.theme-emerald {
-  --md-sys-color-primary: #006D3B;
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #97F7B5;
-  --md-sys-color-on-primary-container: #00210E;
-  --md-sys-color-secondary: #4F6353;
-  --md-sys-color-on-secondary: #FFFFFF;
-  --md-sys-color-surface: #FBFDF8;
-  --md-sys-color-on-surface: #191C19;
-  --md-sys-color-outline: #717971;
-  --md-sys-color-surface-variant: #DDE5DB;
+/* CRED Neumorphic & Modern Utilities */
+.cred-card {
+  background: var(--cred-onyx);
+  border: 1px solid var(--cred-glass-border);
+  box-shadow: 10px 10px 20px #020202, -5px -5px 15px rgba(255, 255, 255, 0.01);
+  border-radius: 24px;
 }
 
-/* Material 3 Card Bases */
+.cred-hero-card {
+  background: linear-gradient(135deg, #1A1A1A 0%, #080808 100%);
+  border: 1px solid rgba(196, 155, 102, 0.2);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.neon-glow {
+  text-shadow: 0 0 10px rgba(255, 46, 99, 0.5);
+}
+
+.copper-glow {
+  box-shadow: 0 0 20px rgba(196, 155, 102, 0.15);
+}
+
+/* Material 3 Card Bases (Aliased for CRED) */
 .m3-card-elevated {
-  background: var(--md-sys-color-surface-variant);
+  background: var(--cred-onyx);
+  border: 1px solid var(--cred-glass-border);
   border-radius: 28px;
   padding: 16px;
-  transition: transform var(--m3-duration-short) var(--m3-easing-standard), box-shadow var(--m3-duration-short) var(--m3-easing-standard);
+  transition: all var(--m3-duration-short) var(--m3-easing-standard);
 }
 
 .m3-card-outlined {
-  background: var(--md-sys-color-surface);
-  border: 1px solid var(--md-sys-color-outline);
+  background: transparent;
+  border: 1.5px solid var(--md-sys-color-outline);
   border-radius: 28px;
   padding: 16px;
 }
 
-/* Edge-to-Edge Padding Helpers */
+/* Safe Area Handling for Notch/Status Bar */
 .safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: env(safe-area-inset-top, 42px) !important;
 }
 
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 24px) !important;
+}
+
+.safe-mt {
+  margin-top: env(safe-area-inset-top, 42px) !important;
 }
 
 /* Navigation Ripple (Simulation) */

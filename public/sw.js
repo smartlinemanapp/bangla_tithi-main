@@ -1,9 +1,9 @@
-const CACHE_NAME = 'bangla-tithi-v1';
+const CACHE_NAME = 'bangla-tithi-v2';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
     '/manifest.json',
-    '/tithi-data.json',
+    '/tithi.json',
     '/icons/icon-192.png',
     '/icons/icon-512.png'
 ];
@@ -38,8 +38,8 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event - Offline First Strategy
 self.addEventListener('fetch', (event) => {
-    // Only handle GET requests
-    if (event.request.method !== 'GET') return;
+    // Only handle GET requests and standard schemes
+    if (event.request.method !== 'GET' || !event.request.url.startsWith('http')) return;
 
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {

@@ -13,7 +13,7 @@ const loadStaticData = async (): Promise<TithiEvent[]> => {
     }
 
     try {
-        const response = await fetch('/tithi-data.json');
+        const response = await fetch('./tithi.json');
         if (!response.ok) {
             throw new Error(`Failed to load data: ${response.statusText}`);
         }
@@ -42,7 +42,8 @@ export const fetchTithisForRange = async (
     const startStr = startDate.toISOString().split('T')[0];
     const endStr = endDate.toISOString().split('T')[0];
 
-    // Filter data by date range
+    // Filter data by date range using the top-level date field
+    // sorting is now done by date string directly as it is YYYY-MM-DD
     return allData.filter(tithi => {
         return tithi.date >= startStr && tithi.date <= endStr;
     });
@@ -53,9 +54,9 @@ export const fetchTithisForRange = async (
  * Uses the description from static data
  */
 export const getTithiAdvice = async (tithi: TithiEvent): Promise<string> => {
-    // Return the description from the static data
-    if (tithi.description) {
-        return tithi.description;
+    // Return the description from the nested event object
+    if (tithi.event && tithi.event.description) {
+        return tithi.event.description;
     }
 
     // Fallback Bengali message

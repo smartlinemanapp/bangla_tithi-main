@@ -27,5 +27,31 @@
             "type": "image/png",
             "purpose": "any"
         }
+    ],
+    "shortcuts": [
+        {
+            "name": "ক্যালেন্ডার",
+            "short_name": "ক্যালেন্ডার",
+            "description": "পূর্ণ ক্যালেন্ডার দেখুন",
+            "url": "/?tab=calendar",
+            "icons": [
+                {
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "আসন্ন তিথি",
+            "short_name": "আসন্ন",
+            "description": "আসন্ন তিথিসমূহ দেখুন",
+            "url": "/?tab=upcoming",
+            "icons": [
+                {
+                    "src": "/icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
     ]
 }

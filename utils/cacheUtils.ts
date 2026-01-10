@@ -1,7 +1,7 @@
 
 import { TithiEvent } from "../types";
 
-const CACHE_KEY = 'bangla_tithi_cache_v3';
+const CACHE_KEY = 'bangla_tithi_cache_v5';
 const LAST_SYNC_KEY = 'bangla_tithi_last_sync';
 
 export interface CachedData {
@@ -24,7 +24,7 @@ export const saveTithisToCache = (newTithis: TithiEvent[]) => {
     const existing = getCachedTithis();
     // Merge and deduplicate based on date + name
     const merged = [...existing, ...newTithis];
-    const unique = Array.from(new Map(merged.map(item => [item.date + item.name, item])).values());
+    const unique = Array.from(new Map(merged.map(item => [item.date + item.event.name, item])).values());
 
     // Sort by date
     unique.sort((a, b) => a.date.localeCompare(b.date));

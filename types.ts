@@ -1,19 +1,48 @@
 
-export interface TithiEvent {
-  date: string; // ISO format (Primary observation date)
-  name: string;
-  banglaName: string;
-  startDateTime: string; // Full ISO 8601 timestamp
-  endDateTime: string;   // Full ISO 8601 timestamp
-  description: string;
-  type: 'Purnima' | 'Amavasya' | 'Pratipada' | 'Ekadashi' | 'Festival' | 'Other';
+export interface SunData {
+  sunrise: string;
+  sunset: string;
+  dayLength: string;
+  nightLength: string;
+  reference: string;
 }
 
+export interface EventDetails {
+  name: string;
+  banglaName: string;
+  type: 'Purnima' | 'Amavasya' | 'Pratipada' | 'Ekadashi' | 'Festival' | 'Ritual' | 'Normal' | 'Other';
+  description: string;
+  startDateTime: string;
+  endDateTime: string;
+}
+
+// Interface for the Bangla Date object found in the JSON data
+export interface JsonBanglaDate {
+  month: string;
+  paksha: string;
+  tithi: string;
+  tithiType: string;
+}
+
+// Interface for the calculated Bangla Date used in utils
 export interface BanglaDate {
   day: number;
   month: string;
   year: number;
   monthIndex: number;
+}
+
+export interface Weekday {
+  en: string;
+  bn: string;
+}
+
+export interface TithiEvent {
+  date: string;
+  weekday: Weekday;
+  banglaDate: JsonBanglaDate;
+  event: EventDetails;
+  sun: SunData;
 }
 
 export const BANGLA_MONTHS = [

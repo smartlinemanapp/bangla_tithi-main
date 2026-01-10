@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bangla Tithi</string>
+    <string name="title_activity_main">Bangla Tithi</string>
+    <string name="package_name">com.banglatithi.app</string>
+    <string name="custom_url_scheme">com.banglatithi.app</string>
+</resources>

@@ -11,7 +11,6 @@ import { M3Card } from './components/M3Card';
 import { triggerHaptic } from './utils/hapticUtils';
 import { TithiModal } from './components/TithiModal';
 
-type Theme = 'saffron' | 'midnight' | 'emerald';
 type FilterType = 'All' | 'Purnima' | 'Amavasya' | 'Ekadashi' | 'Festival';
 
 const App: React.FC = () => {
@@ -22,7 +21,6 @@ const App: React.FC = () => {
   const [selectedTithi, setSelectedTithi] = useState<TithiEvent | null>(null);
   const [advice, setAdvice] = useState<string>('');
   const [adviceLoading, setAdviceLoading] = useState(false);
-  const [theme, setTheme] = useState<Theme>('saffron');
   const [activeFilter, setActiveFilter] = useState<FilterType>('All');
   const [upcomingPage, setUpcomingPage] = useState(0);
   const [activeTab, setActiveTab] = useState<TabType>('home');
@@ -47,33 +45,58 @@ const App: React.FC = () => {
   }, [tithis.length]);
 
   useEffect(() => {
+    // Force cleanup of all old bangla_tithi_cache_v* keys except the current one (v5)
+    const CURRENT_VERSION = 'v5';
+    try {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && key.startsWith('bangla_tithi_cache_') && !key.endsWith(CURRENT_VERSION)) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => {
+        localStorage.removeItem(k);
+        console.log(`Cleaned up legacy cache: ${k}`);
+      });
+    } catch (e) {
+      console.error("Cache cleanup failed", e);
+    }
+
+    // Handle shortcuts / tab query param
+    const params = new URLSearchParams(window.location.search);
+    const tab = params.get('tab');
+    if (tab === 'calendar' || tab === 'upcoming' || tab === 'home') {
+      setActiveTab(tab as TabType);
+      // Clean up the URL to keep it clean
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+
     syncData();
-  }, []);
+  }, [syncData]);
 
   useEffect(() => {
+    // Precise theme-color sync for Android Status Bar (Sacred Saffron / Cream)
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (metaThemeColor) {
-      const colors = {
-        saffron: '#8F4E00',
-        midnight: '#1C1B1F',
-        emerald: '#006D3B'
-      };
-      metaThemeColor.setAttribute('content', colors[theme]);
+      metaThemeColor.setAttribute('content', '#FFFBF0');
     }
-  }, [theme]);
+  }, []);
 
   // Ensure tithis are always sorted chronologically by date and start time
   const sortedTithis = useMemo(() => {
-    return [...tithis].sort((a, b) => {
-      const d = a.date.localeCompare(b.date);
-      if (d !== 0) return d;
-      return a.startDateTime.localeCompare(b.startDateTime);
-    });
+    return [...tithis]
+      .filter(t => t && t.event) // Defensive check
+      .sort((a, b) => {
+        const d = a.date.localeCompare(b.date);
+        if (d !== 0) return d;
+        return (a.event?.startDateTime || '').localeCompare(b.event?.startDateTime || '');
+      });
   }, [tithis]);
 
   // Today's specific tithi
   const todayTithi = useMemo(() =>
-    sortedTithis.find(t => t.date.startsWith(todayStr)),
+    sortedTithis.find(t => t.date === todayStr),
     [sortedTithis, todayStr]
   );
 
@@ -84,7 +107,12 @@ const App: React.FC = () => {
 
     // 2. Filter by type
     if (activeFilter !== 'All') {
-      list = list.filter(t => t.type === activeFilter);
+      list = list.filter(t => {
+        if (activeFilter === 'Purnima') return t.event?.type === 'Purnima' || t.banglaDate?.tithi === 'পূর্ণিমা';
+        if (activeFilter === 'Amavasya') return t.event?.type === 'Amavasya' || t.banglaDate?.tithi === 'অমাবস্যা';
+        if (activeFilter === 'Ekadashi') return t.event?.type === 'Ekadashi' || t.banglaDate?.tithi?.includes('একাদশী');
+        return t.event?.type === activeFilter;
+      });
     }
 
     const count = list.length;
@@ -119,7 +147,7 @@ const App: React.FC = () => {
 
   const handleTithiClick = async (tithi: TithiEvent) => {
     triggerHaptic('selection');
-    if (selectedTithi?.name === tithi.name && selectedTithi?.date === tithi.date) {
+    if (selectedTithi?.event.name === tithi.event.name && selectedTithi?.date === tithi.date) {
       setSelectedTithi(null);
       return;
     }
@@ -136,17 +164,17 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const credTheme = {
+    bg: 'bg-[#050505]',
+    header: 'bg-[#050505]/90 border-[#1A1A1A] text-white',
+    textMain: 'text-[#E0E0E0]',
+    textMuted: 'text-[#888888]',
+    textAccent: 'text-[#C49B66]',
+    card: 'bg-[#121212] border-[#1A1A1A] hover:border-[#333333] shadow-2xl',
+    secondary: 'bg-[#FF2E63]',
+  };
+
   const getTithiColorClass = (type: string) => {
-    if (theme === 'midnight') {
-      switch (type) {
-        case 'Festival': return 'from-red-950 to-orange-950 border-red-800/30 text-red-50';
-        case 'Purnima': return 'from-yellow-900/60 to-amber-950 border-amber-500/30 text-amber-50';
-        case 'Amavasya': return 'from-slate-700 to-black border-slate-600 text-slate-100';
-        case 'Ekadashi': return 'from-orange-950 to-red-950 border-orange-800/30 text-orange-50';
-        case 'Pratipada': return 'from-emerald-950 to-teal-950 border-emerald-800/30 text-emerald-50';
-        default: return 'from-indigo-950 to-slate-950 border-indigo-800/30 text-indigo-50';
-      }
-    }
     switch (type) {
       case 'Festival': return 'from-red-100 to-orange-200 border-red-300 text-red-950';
       case 'Purnima': return 'from-amber-100 to-yellow-200 border-amber-300 text-amber-950';
@@ -157,37 +185,7 @@ const App: React.FC = () => {
     }
   };
 
-  const themeClasses = {
-    saffron: {
-      bg: 'bg-[#faf9f6]',
-      header: 'bg-white/95 border-orange-200 text-orange-950',
-      textMain: 'text-amber-950',
-      textMuted: 'text-amber-800/70',
-      textAccent: 'text-orange-700',
-      card: 'bg-white border-orange-100 hover:border-orange-300 shadow-sm',
-      secondary: 'bg-orange-600',
-    },
-    midnight: {
-      bg: 'bg-[#020617]',
-      header: 'bg-slate-950/95 border-slate-800 text-slate-100',
-      textMain: 'text-slate-100',
-      textMuted: 'text-slate-400',
-      textAccent: 'text-indigo-400',
-      card: 'bg-slate-900 border-slate-800/60 hover:border-indigo-500/40 shadow-sm',
-      secondary: 'bg-indigo-600',
-    },
-    emerald: {
-      bg: 'bg-[#f0fdf4]',
-      header: 'bg-white/95 border-emerald-200 text-emerald-950',
-      textMain: 'text-emerald-950',
-      textMuted: 'text-emerald-800/70',
-      textAccent: 'text-emerald-700',
-      card: 'bg-white border-emerald-100 hover:border-emerald-300 shadow-sm',
-      secondary: 'bg-emerald-600',
-    }
-  };
-
-  const activeTheme = themeClasses[theme];
+  const activeTheme = credTheme;
   const todayLabel = (() => {
     const d = new Date();
     const day = String(d.getDate()).padStart(2, '0');
@@ -219,28 +217,39 @@ const App: React.FC = () => {
   };
 
   const CompactTithiCard = ({ t, isHero = false }: { t: TithiEvent, isHero?: boolean, key?: string }) => {
-    const isSelected = selectedTithi?.name === t.name && selectedTithi?.date === t.date;
-    const colorClass = getTithiColorClass(t.type);
+    const isSelected = selectedTithi?.event.name === t.event.name && selectedTithi?.date === t.date;
+    const colorClass = getTithiColorClass(t.event.type);
 
     return (
       <div className="flex flex-col gap-3">
         <M3Card
           onClick={() => handleTithiClick(t)}
           variant={isHero ? 'elevated' : 'outlined'}
-          className={`relative group p-5 overflow-hidden border-none ${isHero ? `shadow-2xl ${colorClass}` : `${activeTheme.card} ${isSelected ? 'ring-2 ring-current/10' : ''}`}`}
+          className={`
+            relative group p-6 overflow-hidden border-none 
+            transition-all duration-500 hover:scale-[1.01] active:scale-[0.98]
+            ${isHero ? `cred-hero-card ${colorClass}` : `${activeTheme.card} ${isSelected ? 'ring-2 ring-[#C49B66]/20 shadow-lg' : 'hover:shadow-md'}`}
+            animate-in fade-in slide-in-from-bottom-2 duration-500
+          `}
         >
-          {isHero && <LunarBackground type={t.type} />}
+          {isHero && <LunarBackground type={t.event.type} />}
 
           <div className="relative z-10 flex flex-col gap-4">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
-                <div className={`p-2.5 rounded-xl shadow-inner ${isHero ? 'bg-white/20 backdrop-blur-3xl border border-white/30' : (theme === 'midnight' ? 'bg-slate-800' : 'bg-gray-100/60')}`}>
-                  <TithiIcon type={t.type} size={isHero ? "md" : "sm"} />
+                <div className={`p-2.5 rounded-xl shadow-inner ${isHero ? 'bg-white/10 backdrop-blur-3xl border border-white/20' : 'bg-white/[0.03]'}`}>
+                  <TithiIcon type={t.event.type} size={isHero ? "md" : "sm"} />
                 </div>
                 <div>
-                  <h3 className={`${isHero ? 'text-3xl' : 'text-xl'} font-black bangla-font tracking-tight leading-none ${isHero ? '' : activeTheme.textMain}`}>{t.banglaName}</h3>
+                  <h3 className={`
+                    ${isHero ? 'text-4xl' : 'text-xl'} 
+                    font-black bangla-font tracking-tighter leading-none mb-1
+                    ${isHero ? 'text-white' : activeTheme.textMain}
+                  `}>
+                    {t.event.banglaName}
+                  </h3>
                   <div className={`flex items-center gap-1.5 mt-0.5 ${isHero ? 'opacity-60' : activeTheme.textMuted}`}>
-                    <span className="text-[10px] font-black bangla-font">
+                    <span className="text-[10px] font-bold bangla-font tracking-wider uppercase opacity-40">
                       {(() => {
                         const b = getBanglaDate(new Date(t.date));
                         return `${toBengaliNumber(b.day)} ${BANGLA_MONTHS_BN[b.monthIndex]}, ${toBengaliNumber(b.year)}`;
@@ -250,25 +259,25 @@ const App: React.FC = () => {
                 </div>
               </div>
               {!isHero && (
-                <div className={`px-3 py-1.5 rounded-xl flex flex-col items-center justify-center min-w-[50px] ${theme === 'midnight' ? 'bg-slate-800/80' : 'bg-gray-100/40'}`}>
+                <div className="px-3 py-1.5 rounded-xl flex flex-col items-center justify-center min-w-[50px] bg-white/[0.02] border border-white/[0.05]">
                   <span className={`text-lg font-black leading-none ${activeTheme.textMain}`}>{toBengaliNumber(new Date(t.date).getDate())}</span>
-                  <span className={`text-[7px] font-black opacity-60 bangla-font mt-0.5 ${activeTheme.textMain}`}>{ENGLISH_MONTHS_BN[new Date(t.date).getMonth()]}</span>
+                  <span className={`text-[7px] font-black opacity-40 uppercase tracking-widest mt-0.5 ${activeTheme.textMain}`}>{ENGLISH_MONTHS_BN[new Date(t.date).getMonth()]}</span>
                 </div>
               )}
             </div>
 
-            <div className={`flex justify-between items-center gap-2 py-3 px-0.5 border-y ${isHero ? 'border-white/10' : 'border-current/5'}`}>
-              <TimeBlock label="আরম্ভ" isoDateTime={t.startDateTime} isHero={isHero} />
-              <div className={`h-6 w-[1px] hidden sm:block ${isHero ? 'bg-white/10' : 'bg-current/10'}`}></div>
-              <TimeBlock label="সমাপ্তি" isoDateTime={t.endDateTime} isEnd isHero={isHero} />
+            <div className={`flex justify-between items-center gap-2 py-4 px-1 border-y ${isHero ? 'border-white/10' : 'border-white/5'}`}>
+              <TimeBlock label="আরম্ভ" isoDateTime={t.event.startDateTime} isHero={isHero} />
+              <div className={`h-8 w-[1px] hidden sm:block ${isHero ? 'bg-white/10' : 'bg-white/5'} opacity-20`}></div>
+              <TimeBlock label="সমাপ্তি" isoDateTime={t.event.endDateTime} isEnd isHero={isHero} />
             </div>
 
             {isHero && (
               <button
                 onClick={(e) => { e.stopPropagation(); triggerHaptic('medium'); alert('রিমাইন্ডার সেট করা হয়েছে (Demo)'); }}
-                className={`w-full py-3 rounded-xl font-black text-[10px] uppercase tracking-widest bangla-font transition-all ${theme === 'midnight' ? 'bg-indigo-500 text-white hover:bg-indigo-600 shadow-lg' : 'bg-black text-white hover:bg-gray-900 shadow-xl'}`}
+                className="w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-[#C49B66] text-black hover:bg-[#D4AB76] shadow-xl copper-glow"
               >
-                রিমাইন্ডার সেট করুন
+                Set Reminder
               </button>
             )}
           </div>
@@ -285,7 +294,7 @@ const App: React.FC = () => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className={`h-24 border-r border-b ${theme === 'midnight' ? 'border-slate-800 bg-slate-900/10' : 'border-gray-50 bg-gray-50/10'}`} />);
+      days.push(<div key={`empty-${i}`} className="h-28 border-r border-b border-white/[0.02] bg-white/[0.01]" />);
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -295,21 +304,22 @@ const App: React.FC = () => {
       const bDateInfo = getBanglaDate(new Date(year, month, d));
 
       days.push(
-        <div key={d} className={`h-24 border-r border-b p-2 transition-all hover:bg-gray-500/5 relative flex flex-col ${theme === 'midnight' ? 'border-slate-800' : 'border-gray-100'} ${isToday ? (theme === 'midnight' ? 'bg-indigo-900/20' : 'bg-orange-50/30') : ''}`}>
-          <div className="flex justify-between items-start w-full mb-1">
-            <span className={`text-[9px] font-medium opacity-40 ${activeTheme.textMain}`}>{d}</span>
-            <span className={`text-[11px] font-black bangla-font ${isToday ? activeTheme.textAccent : activeTheme.textMain}`}>
+        <div key={d} className={`h-28 border-r border-b p-1.5 transition-all hover:bg-white/[0.02] relative flex flex-col items-center border-white/[0.02] ${isToday ? 'bg-[#C49B66]/5' : ''} ${((firstDay + d) % 7 === 0) ? 'border-r-0' : ''}`}>
+          <div className="flex flex-col items-center gap-0.5 pt-1">
+            <span className={`text-[10px] font-black opacity-30 ${activeTheme.textMain}`}>{d}</span>
+            <span className={`text-lg font-black bangla-font ${isToday ? activeTheme.textAccent : activeTheme.textMain} tracking-tight leading-none`}>
               {toBengaliNumber(bDateInfo.day)}
             </span>
           </div>
-          <div className="flex-1 flex flex-col items-center justify-center">
+
+          <div className="mt-auto mb-1 w-full flex flex-col items-center">
             {tithiOnDay && (
               <div
                 onClick={() => handleTithiClick(tithiOnDay)}
                 className="flex flex-col items-center cursor-pointer transform transition-transform hover:scale-105 w-full"
               >
-                <TithiIcon type={tithiOnDay.type} size="sm" />
-                <span className={`text-[7px] font-black bangla-font mt-1 opacity-90 truncate w-full text-center ${activeTheme.textMain}`}>{tithiOnDay.banglaName}</span>
+                <TithiIcon type={tithiOnDay.event.type} size="sm" />
+                <span className={`text-[8px] font-black bangla-font opacity-80 truncate w-full text-center ${activeTheme.textMain}`}>{tithiOnDay.event.banglaName}</span>
               </div>
             )}
           </div>
@@ -352,12 +362,12 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen pb-32 transition-colors duration-500 font-sans theme-${theme} ${activeTheme.bg} ${activeTheme.textMain}`}>
+    <div className={`min-h-screen pb-32 transition-colors duration-500 font-sans ${activeTheme.bg} ${activeTheme.textMain}`}>
       {/* Top App Bar - Fixed/Pinned */}
       <header className={`backdrop-blur-xl border-b p-5 sticky top-0 z-50 transition-all duration-500 ${activeTheme.header} safe-top`}>
         <div className="max-w-3xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${theme === 'midnight' ? 'bg-indigo-500/10' : 'bg-orange-500/10'}`}>
+            <div className="p-2 rounded-xl bg-orange-500/10">
               <svg className={`w-6 h-6 ${activeTheme.textAccent}`} fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
             </div>
             <div className="relative">
@@ -369,51 +379,128 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex gap-2 bg-black/5 p-1.5 rounded-full border border-black/5">
-              {(['saffron', 'midnight', 'emerald'] as Theme[]).map(t => (
-                <button
-                  key={t}
-                  onClick={() => { setTheme(t); triggerHaptic('selection'); }}
-                  className={`w-7 h-7 rounded-full border-2 transition-all ${theme === t ? 'scale-110 border-white shadow-lg' : 'border-transparent opacity-40 hover:opacity-100'} ${t === 'saffron' ? 'bg-orange-500' : t === 'midnight' ? 'bg-indigo-900' : 'bg-emerald-500'}`}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto mt-6 px-5 relative pb-20">
 
-        {/* Tab 1: Home (Today + Filters + Quick Info) */}
+        {/* Tab 1: Home (Redesigned: Today & Solar & Quick Highlights) */}
         {activeTab === 'home' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-10">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
+            {/* 1. Today's Premium Hero */}
+            <section className="relative overflow-hidden rounded-[2.5rem] p-10 -mx-1 cred-hero-card text-white border border-[#C49B66]/20">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
+              </div>
+              <div className="relative z-10 flex flex-col gap-10">
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-col gap-1">
+                    <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-[#C49B66] mb-3">Today's Panjika</h2>
+                    <div className="flex flex-col">
+                      <span className="text-6xl font-black tracking-tighter leading-none mb-2">
+                        {todayLabel.formatted.split('/')[0]} {ENGLISH_MONTHS_BN[new Date().getMonth()]}
+                      </span>
+                      <span className="text-xl font-medium text-white/50 tracking-wide">{todayLabel.dayName} • {toBengaliNumber(new Date().getFullYear().toString())}</span>
+                    </div>
+                  </div>
+                  <div className="px-4 py-2 bg-white/5 backdrop-blur-3xl rounded-full border border-white/5 text-[11px] font-black bangla-font tracking-tight text-[#C49B66]">আজকের দিন</div>
+                </div>
+
+                <div className="flex items-center gap-6 py-6 border-t border-white/5 mt-4">
+                  <div className="flex-1 flex flex-col items-center p-4 rounded-3xl bg-white/[0.02] border border-white/[0.03]">
+                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Bangla Date</span>
+                    <span className="text-xl font-black text-[#C49B66]">
+                      {(() => {
+                        const b = getBanglaDate(new Date());
+                        return `${toBengaliNumber(b.day)} ${BANGLA_MONTHS_BN[b.monthIndex]}`;
+                      })()}
+                    </span>
+                  </div>
+                  <div className="flex-1 flex flex-col items-center p-4 rounded-3xl bg-white/[0.02] border border-white/[0.03]">
+                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Bangla Year</span>
+                    <span className="text-xl font-black text-[#C49B66]">
+                      {toBengaliNumber(getBanglaDate(new Date()).year.toString())}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Today's Tithi Special Card (If exists) */}
             <section>
-              <div className="flex items-center gap-2.5 mb-6">
-                <div className={`w-1.5 h-6 rounded-full ${activeTheme.secondary} shadow-md`}></div>
-                <h2 className={`text-xl font-black bangla-font ${activeTheme.textMain}`}>আজকের বিশেষ দিন</h2>
+              <div className="flex items-center justify-between mb-4 px-1">
+                <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>আজকের বিশেষ তিথি</h2>
+                {!todayTithi && <span className="text-[9px] font-black bangla-font opacity-40 uppercase tracking-widest pt-1">কোনো বিশেষ তিথি নেই</span>}
               </div>
 
               {todayTithi ? (
-                <CompactTithiCard t={todayTithi} isHero />
+                <div className="space-y-4">
+                  <CompactTithiCard t={todayTithi} isHero />
+                </div>
               ) : (
-                <M3Card variant="outlined" className={`p-8 flex flex-col items-center justify-center text-center ${theme === 'midnight' ? 'bg-slate-900/40 text-slate-400' : 'bg-white/40 text-slate-500'}`}>
-                  <div className={`p-4 rounded-2xl mb-4 ${theme === 'midnight' ? 'bg-slate-800' : 'bg-gray-50'}`}>
-                    <svg className="w-8 h-8 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                <M3Card variant="outlined" className="p-6 border-dashed flex items-center gap-4 bg-gray-50/50">
+                  <div className="p-3 rounded-full bg-gray-100">
+                    <svg className="w-5 h-5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                   </div>
-                  <h3 className="text-lg font-black bangla-font mb-1 tracking-tight">আজ কোনো বিশেষ তিথি নেই</h3>
-                  <p className="text-xs opacity-60 max-w-[200px] leading-relaxed">আজকের দিনটি সাধারণ ক্যালেন্ডার অনুযায়ী পালন করুন।</p>
+                  <p className="text-xs font-bold bangla-font opacity-50 flex-1">আজকের দিনটি সাধারণ ক্যালেন্ডার অনুযায়ী পালন করুন।</p>
                 </M3Card>
               )}
             </section>
 
             <section>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className={`w-1.5 h-6 rounded-full bg-current opacity-10`}></div>
-                <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>বিষয় অনুযায়ী খুঁজুন</h2>
+              <div className="flex items-center gap-2 mb-4 px-1">
+                <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>Solar & Atmosphere</h2>
+                <div className="flex-1 h-[1px] bg-white/5 ml-2"></div>
               </div>
-              <FilterChips />
-              <div className="mt-4 grid grid-cols-1 gap-4">
-                <p className="text-xs opacity-40 bangla-font text-center italic">উপরে ফিল্টার ব্যবহার করে আসন্ন তিথিগুলো দেখুন</p>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#C49B66]/5 rounded-full blur-2xl group-hover:bg-[#C49B66]/10 transition-all"></div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C49B66] copper-glow"></span> RAW SUNRISE
+                  </span>
+                  <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
+                    {todayTithi?.sun.sunrise || "০৬:২০"}
+                  </span>
+                  <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Horizon Check • IST</span>
+                </div>
+
+                <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#FF2E63]/5 rounded-full blur-2xl group-hover:bg-[#FF2E63]/10 transition-all"></div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[#FF2E63] flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#FF2E63] neon-glow"></span> DUSK CALC
+                  </span>
+                  <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
+                    {todayTithi?.sun.sunset || "১৭:১৭"}
+                  </span>
+                  <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Standard Deviation • IST</span>
+                </div>
+              </div>
+
+              {todayTithi?.sun.dayLength && (
+                <div className={`mt-4 p-5 rounded-3xl border border-white/5 flex justify-between items-center bg-white/[0.01] cred-card`}>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66]">Cycle Duration</span>
+                  <span className="text-sm font-black tracking-wider text-white/80">{todayTithi.sun.dayLength}</span>
+                </div>
+              )}
+            </section>
+
+            {/* 4. Mini Coming Up Section */}
+            <section className="pb-8">
+              <div className="flex items-center gap-2 mb-4 px-1">
+                <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>আসন্ন তিথি</h2>
+                <button
+                  onClick={() => handleTabChange('upcoming')}
+                  className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1 ml-auto ${activeTheme.textAccent}`}
+                >
+                  সব দেখুন <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeWidth="3" /></svg>
+                </button>
+              </div>
+              <div className="flex flex-col gap-3">
+                {sortedTithis.filter(t => t.date > todayStr).slice(0, 1).map((t, i) => (
+                  <CompactTithiCard key={i} t={t} />
+                ))}
               </div>
             </section>
           </div>
@@ -424,18 +511,18 @@ const App: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className={`w-1.5 h-6 rounded-full ${activeTheme.secondary} shadow-md`}></div>
+                <div className={`w-1.5 h-6 rounded-full bg-[#C49B66] shadow-md copper-glow`}></div>
                 <h2 className={`text-xl font-black bangla-font ${activeTheme.textMain}`}>মাসিক ক্যালেন্ডার</h2>
               </div>
             </div>
 
-            <M3Card variant="elevated" className={`mb-10 overflow-hidden border-none p-0 ${theme === 'midnight' ? 'bg-slate-950' : 'bg-white'}`}>
-              <div className={`p-4 border-b flex justify-between items-center ${theme === 'midnight' ? 'bg-slate-900/40' : 'bg-gray-50/40'}`}>
-                <button onClick={() => { handleDateChange(-1); triggerHaptic('selection'); }} className={`p-2 rounded-xl transition-all ${theme === 'midnight' ? 'hover:bg-slate-800' : 'hover:bg-white shadow-sm'}`}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg></button>
-                <h3 className={`font-black uppercase tracking-[0.15em] text-xs ${activeTheme.textMain}`}>{currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}</h3>
-                <button onClick={() => { handleDateChange(1); triggerHaptic('selection'); }} className={`p-2 rounded-xl transition-all ${theme === 'midnight' ? 'hover:bg-slate-800' : 'hover:bg-white shadow-sm'}`}><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg></button>
+            <M3Card variant="elevated" className="mb-10 overflow-hidden border-none p-0 bg-[#121212] cred-card">
+              <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
+                <button onClick={() => { handleDateChange(-1); triggerHaptic('selection'); }} className="p-3 rounded-2xl transition-all hover:bg-white/5 active:scale-95 text-[#C49B66]"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg></button>
+                <h3 className={`font-black uppercase tracking-[0.2em] text-[10px] ${activeTheme.textMain}`}>{currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}</h3>
+                <button onClick={() => { handleDateChange(1); triggerHaptic('selection'); }} className="p-3 rounded-2xl transition-all hover:bg-white/5 active:scale-95 text-[#C49B66]"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 5l7 7-7 7" /></svg></button>
               </div>
-              <div className={`grid grid-cols-7 border-b ${theme === 'midnight' ? 'border-slate-800/50' : 'border-gray-50'}`}>
+              <div className="grid grid-cols-7 border-b border-white/5">
                 {DAYS_BN.map(day => <div key={day} className={`py-3 text-center font-black bangla-font text-[10px] uppercase opacity-50 ${activeTheme.textMain}`}>{day}</div>)}
               </div>
               <div className="grid grid-cols-7">
@@ -450,7 +537,7 @@ const App: React.FC = () => {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2.5">
-                <div className={`w-1.5 h-6 rounded-full ${activeTheme.secondary} shadow-md`}></div>
+                <div className={`w-1.5 h-6 rounded-full bg-[#C49B66] shadow-md copper-glow`}></div>
                 <h2 className={`text-xl font-black bangla-font ${activeTheme.textMain}`}>
                   {activeFilter === 'All' ? 'আসন্ন বিশেষ দিনসমূহ' : `আসন্ন ${activeFilter === 'Festival' ? 'উৎসব' : activeFilter === 'Purnima' ? 'পূর্ণিমা' : activeFilter === 'Amavasya' ? 'অমাবস্যা' : activeFilter === 'Ekadashi' ? 'একাদশী' : activeFilter}`}
                 </h2>
@@ -461,9 +548,9 @@ const App: React.FC = () => {
               <FilterChips />
 
               <div id="upcoming-list" className="grid grid-cols-1 gap-5">
-                {syncing && tithis.length === 0 ? [1, 2, 3].map(i => <div key={i} className={`h-32 rounded-3xl animate-pulse ${theme === 'midnight' ? 'bg-slate-900' : 'bg-gray-100'}`}></div>) :
-                  (paginatedTithis.length > 0 ? paginatedTithis.map((t, idx) => <CompactTithiCard key={`${t.date}-${t.name}-${idx}`} t={t} />) : (
-                    <M3Card variant="outlined" className={`p-12 text-center opacity-30 ${theme === 'midnight' ? 'border-slate-800' : 'border-orange-200'}`}>
+                {syncing && tithis.length === 0 ? [1, 2, 3].map(i => <div key={i} className="h-32 rounded-3xl animate-pulse bg-white/[0.03] border border-white/[0.05]"></div>) :
+                  (paginatedTithis.length > 0 ? paginatedTithis.map((t, idx) => <CompactTithiCard key={`${t.date}-${t.event.name}-${idx}`} t={t} />) : (
+                    <M3Card variant="outlined" className="p-12 text-center opacity-30 border-white/[0.05] bg-white/[0.01]">
                       <h3 className="text-sm font-black bangla-font">কোনো তথ্য পাওয়া যায়নি</h3>
                     </M3Card>
                   ))}
@@ -497,7 +584,6 @@ const App: React.FC = () => {
       <BottomNav
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        theme={theme}
       />
 
       {/* Background Refreshing Indicator (Minimal Android Pulsar) */}
@@ -515,8 +601,6 @@ const App: React.FC = () => {
         onClose={() => setSelectedTithi(null)}
         advice={advice}
         adviceLoading={adviceLoading}
-        theme={theme}
-        activeTheme={activeTheme}
       />
     </div>
   );
