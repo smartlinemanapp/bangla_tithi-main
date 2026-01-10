@@ -11,7 +11,11 @@ import { M3Card } from './components/M3Card';
 import { triggerHaptic } from './utils/hapticUtils';
 import { TithiModal } from './components/TithiModal';
 import { ThemeSelector, PALETTES, ThemePalette } from './components/ThemeSelector';
+
 import { supabase, isSupabaseConfigured } from './services/supabase';
+import { PremiumLock } from './components/PremiumLock';
+import { LicenseModal } from './components/LicenseModal';
+import { getLicenseStatus } from './services/license';
 
 type FilterType = 'All' | 'Purnima' | 'Amavasya' | 'Ekadashi' | 'Festival';
 
@@ -28,9 +32,12 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('home');
   const [currentPalette, setCurrentPalette] = useState<ThemePalette>(() => {
     const saved = localStorage.getItem('bangla_tithi_palette');
+
     return saved ? JSON.parse(saved) : PALETTES[0];
   });
   const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [isPremium, setIsPremium] = useState(getLicenseStatus());
+  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
 
   const todayStr = useMemo(() => {
     const now = new Date();
@@ -202,6 +209,13 @@ const App: React.FC = () => {
 
   const handleTabChange = (tab: TabType) => {
     triggerHaptic('light');
+
+    // Intercept navigation to 'upcoming' if current filter is locked
+    if (tab === 'upcoming' && !isPremium && activeFilter !== 'Purnima') {
+      setIsLicenseModalOpen(true);
+      return;
+    }
+
     setActiveTab(tab);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -389,6 +403,10 @@ const App: React.FC = () => {
             key={f.val}
             onClick={() => {
               triggerHaptic('selection');
+              if (!isPremium && f.val !== 'Purnima') {
+                setIsLicenseModalOpen(true);
+                return;
+              }
               setActiveFilter(f.val);
               setUpcomingPage(0);
               setSelectedTithi(null);
@@ -398,7 +416,12 @@ const App: React.FC = () => {
               : `bg-white/5 ${activeTheme.textMain} border-white/5 hover:border-white/20`}`}
           >
             <span className="text-[10px] opacity-70">{f.icon}</span>
-            <span className="text-xs font-black bangla-font tracking-tight">{f.label}</span>
+            <span className="text-xs font-black bangla-font tracking-tight flex items-center gap-1.5">
+              {f.label}
+              {!isPremium && f.val !== 'Purnima' && (
+                <svg className="w-2.5 h-2.5 opacity-60" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" /></svg>
+              )}
+            </span>
           </button>
         ))}
       </div>
@@ -428,12 +451,31 @@ const App: React.FC = () => {
                 triggerHaptic('selection');
                 setIsThemeOpen(true);
               }}
-              className="p-3 rounded-2xl bg-white/5 border border-white/5 active:scale-90 transition-all shadow-xl"
-              title="Change Theme Color"
+              className="p-3 bg-white/5 rounded-2xl border border-white/5 active:scale-90 transition-all shadow-xl"
             >
-              <svg className="w-5 h-5 text-[var(--accent-main)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className={`w-5 h-5 ${activeTheme.textMain}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.828 2.828a2 2 0 010 2.828l-8.486 8.486M7 7L4 10" />
               </svg>
+            </button>
+            <button
+              onClick={() => {
+                triggerHaptic('selection');
+                if (isPremium) {
+                  alert("You are a Premium User! Thank you.");
+                } else {
+                  setIsLicenseModalOpen(true);
+                }
+              }}
+              className={`p-3 rounded-2xl active:scale-90 transition-all shadow-xl flex items-center justify-center
+                    ${isPremium ? 'bg-[var(--accent-main)]/10 border border-[var(--accent-main)]/20' : 'bg-white/5 border border-white/5'}
+                `}
+              title={isPremium ? "Premium Account" : "Unlock Premium"}
+            >
+              {isPremium ? (
+                <svg className="w-5 h-5 text-[var(--accent-main)]" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+              ) : (
+                <svg className="w-5 h-5 text-amber-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+              )}
             </button>
           </div>
         </div>
@@ -447,7 +489,7 @@ const App: React.FC = () => {
             {/* 1. Today's Premium Hero */}
             <section className="relative overflow-hidden rounded-[2.5rem] p-10 -mx-1 cred-hero-card text-white border border-[#C49B66]/20">
               <div className="absolute top-0 right-0 p-8 opacity-5">
-                <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
+                <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8 0 1010.586 10.586z" /></svg>
               </div>
               <div className="relative z-10 flex flex-col gap-10">
                 <div className="flex justify-between items-start">
@@ -507,39 +549,46 @@ const App: React.FC = () => {
             <section>
               <div className="flex items-center gap-2 mb-4 px-1">
                 <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>Solar & Atmosphere</h2>
+                {isPremium && <span className="px-2 py-0.5 rounded-md bg-gradient-to-r from-amber-400 to-orange-500 text-black text-[9px] font-black uppercase tracking-widest shadow-lg shadow-orange-500/20">PRO</span>}
                 <div className="flex-1 h-[1px] bg-white/5 ml-2"></div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
-                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-main)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-main)]/10 transition-all"></div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66] flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-main)] copper-glow"></span> RAW SUNRISE
-                  </span>
-                  <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
-                    {todayTithi?.sun.sunrise || "০৬:২০"}
-                  </span>
-                  <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Horizon Check • IST</span>
+              <PremiumLock
+                isPremium={isPremium}
+                onUnlock={() => setIsLicenseModalOpen(true)}
+                title="Advanced Solar Data"
+              >
+                <div className="grid grid-cols-2 gap-4">
+                  <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
+                    <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-main)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-main)]/10 transition-all"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66] flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-main)] copper-glow"></span> RAW SUNRISE
+                    </span>
+                    <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
+                      {todayTithi?.sun.sunrise || "০৬:২০"}
+                    </span>
+                    <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Horizon Check • IST</span>
+                  </div>
+
+                  <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
+                    <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-secondary)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-secondary)]/10 transition-all"></div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--accent-secondary)] flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-secondary)] neon-glow"></span> DUSK CALC
+                    </span>
+                    <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
+                      {todayTithi?.sun.sunset || "১৭:১৭"}
+                    </span>
+                    <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Standard Deviation • IST</span>
+                  </div>
                 </div>
 
-                <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
-                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-secondary)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-secondary)]/10 transition-all"></div>
-                  <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--accent-secondary)] flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-secondary)] neon-glow"></span> DUSK CALC
-                  </span>
-                  <span className={`text-4xl font-black tracking-tighter ${activeTheme.textMain}`}>
-                    {todayTithi?.sun.sunset || "১৭:১৭"}
-                  </span>
-                  <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Standard Deviation • IST</span>
-                </div>
-              </div>
-
-              {todayTithi?.sun.dayLength && (
-                <div className={`mt-4 p-5 rounded-3xl border border-white/5 flex justify-between items-center bg-white/[0.01] cred-card`}>
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66]">Cycle Duration</span>
-                  <span className="text-sm font-black tracking-wider text-white/80">{todayTithi.sun.dayLength}</span>
-                </div>
-              )}
+                {todayTithi?.sun.dayLength && (
+                  <div className={`mt-4 p-5 rounded-3xl border border-white/5 flex justify-between items-center bg-white/[0.01] cred-card`}>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66]">Cycle Duration</span>
+                    <span className="text-sm font-black tracking-wider text-white/80">{todayTithi.sun.dayLength}</span>
+                  </div>
+                )}
+              </PremiumLock>
             </section>
 
             {/* 4. Mini Coming Up Section */}
@@ -547,7 +596,14 @@ const App: React.FC = () => {
               <div className="flex items-center gap-2 mb-4 px-1">
                 <h2 className={`text-lg font-black bangla-font ${activeTheme.textMain}`}>আসন্ন তিথি</h2>
                 <button
-                  onClick={() => handleTabChange('upcoming')}
+                  onClick={() => {
+                    triggerHaptic('selection');
+                    if (!isPremium) {
+                      setIsLicenseModalOpen(true);
+                    } else {
+                      handleTabChange('upcoming');
+                    }
+                  }}
                   className={`text-[9px] font-black uppercase tracking-widest flex items-center gap-1 ml-auto ${activeTheme.textAccent}`}
                 >
                   সব দেখুন <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" strokeWidth="3" /></svg>
@@ -604,12 +660,18 @@ const App: React.FC = () => {
               <FilterChips />
 
               <div id="upcoming-list" className="grid grid-cols-1 gap-5">
-                {syncing && tithis.length === 0 ? [1, 2, 3].map(i => <div key={i} className="h-32 rounded-3xl animate-pulse bg-white/[0.03] border border-white/[0.05]"></div>) :
-                  (paginatedTithis.length > 0 ? paginatedTithis.map((t, idx) => <CompactTithiCard key={`${t.date}-${t.event.name}-${idx}`} t={t} />) : (
-                    <M3Card variant="outlined" className="p-12 text-center opacity-30 border-white/[0.05] bg-white/[0.01]">
-                      <h3 className="text-sm font-black bangla-font">কোনো তথ্য পাওয়া যায়নি</h3>
-                    </M3Card>
-                  ))}
+                <PremiumLock
+                  isPremium={isPremium || activeFilter === 'Purnima'}
+                  onUnlock={() => setIsLicenseModalOpen(true)}
+                  title={`Unlock ${activeFilter === 'All' ? 'Full Calendar' : activeFilter} List`}
+                >
+                  {syncing && tithis.length === 0 ? [1, 2, 3].map(i => <div key={i} className="h-32 rounded-3xl animate-pulse bg-white/[0.03] border border-white/[0.05]"></div>) :
+                    (paginatedTithis.length > 0 ? paginatedTithis.map((t, idx) => <CompactTithiCard key={`${t.date}-${t.event.name}-${idx}`} t={t} />) : (
+                      <M3Card variant="outlined" className="p-12 text-center opacity-30 border-white/[0.05] bg-white/[0.01]">
+                        <h3 className="text-sm font-black bangla-font">কোনো তথ্য পাওয়া যায়নি</h3>
+                      </M3Card>
+                    ))}
+                </PremiumLock>
               </div>
 
               {totalPages > 1 && (
@@ -659,6 +721,18 @@ const App: React.FC = () => {
           setCurrentPalette(p);
           setIsThemeOpen(false);
         }}
+      />
+
+      <LicenseModal
+        isOpen={isLicenseModalOpen}
+        onClose={() => setIsLicenseModalOpen(false)}
+        onSuccess={() => setIsPremium(true)}
+      />
+
+      <LicenseModal
+        isOpen={isLicenseModalOpen}
+        onClose={() => setIsLicenseModalOpen(false)}
+        onSuccess={() => setIsPremium(true)}
       />
 
       <TithiModal
