@@ -14,7 +14,8 @@ import { ThemeSelector, PALETTES, ThemePalette } from './components/ThemeSelecto
 
 import { supabase, isSupabaseConfigured } from './services/supabase';
 import { PremiumLock } from './components/PremiumLock';
-import { LicenseModal } from './components/LicenseModal';
+// PREMIUM DISABLED FOR INITIAL LAUNCH - Uncomment when ready
+// import { LicenseModal } from './components/LicenseModal';
 import { RemindersModal } from './components/RemindersModal';
 import { ReminderOptionsModal } from './components/ReminderOptionsModal';
 import { ReminderFormModal } from './components/ReminderFormModal';
@@ -52,8 +53,9 @@ const App: React.FC = () => {
     localStorage.setItem('bangla_tithi_style', currentStyle);
   }, [currentStyle]);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
-  const [isPremium, setIsPremium] = useState(getLicenseStatus());
-  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+  // PREMIUM DISABLED FOR INITIAL LAUNCH - All features unlocked
+  const [isPremium, setIsPremium] = useState(true); // Always true for now
+  const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false); // Keep state to avoid errors
   const [isRemindersOpen, setIsRemindersOpen] = useState(false);
   const [isReminderOptionsOpen, setIsReminderOptionsOpen] = useState(false);
   const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
@@ -129,6 +131,12 @@ const App: React.FC = () => {
         supabase.removeChannel(channel);
       };
     }
+
+    // PREMIUM DISABLED - RevenueCat initialization commented out
+    // import('./services/purchases').then(({ initializePurchases }) => {
+    //   initializePurchases();
+    // });
+
   }, [syncData]);
 
   useEffect(() => {
@@ -773,11 +781,13 @@ const App: React.FC = () => {
         }}
       />
 
+      {/* PREMIUM DISABLED - LicenseModal hidden
       <LicenseModal
         isOpen={isLicenseModalOpen}
         onClose={() => setIsLicenseModalOpen(false)}
         onSuccess={() => setIsPremium(true)}
       />
+      */}
 
       <RemindersModal
         isOpen={isRemindersOpen}
