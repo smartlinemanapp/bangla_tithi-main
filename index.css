@@ -134,3 +134,346 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* =========================================
+   VISUAL THEME STYLES (Overrides)
+   ========================================= */
+
+/* --- Cartoon Style --- */
+/* Bold, playful, high saturation */
+body.style-cartoon {
+  --md-sys-color-surface: #202020;
+  --md-sys-color-surface-variant: #303030;
+  --cred-glass-border: rgba(255, 255, 255, 0.4);
+}
+
+body.style-cartoon .cred-card,
+body.style-cartoon .m3-card-elevated,
+body.style-cartoon .m3-card-outlined,
+body.style-cartoon button {
+  border-width: 2px !important;
+  border-color: var(--accent-main) !important;
+  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 16px !important;
+}
+
+/* Specific Cartoon Modal Overrides */
+/* The main modal container needs a specific class hook or selector strategy to be targeted effectively if it's rendered in portal.
+   Since TithiModal renders via Portal to body, we rely on body.style-cartoon affecting its children.
+   The modal container in TithiModal uses tailwind classes, so we might need to be specific.
+*/
+body.style-cartoon .fixed.z-\[200\]>div.relative {
+  /* This targets the modal container */
+  border: 4px solid var(--accent-main) !important;
+  box-shadow: 10px 10px 0px 0px rgba(0, 0, 0, 0.9) !important;
+  border-radius: 32px !important;
+  background-color: #202020 !important;
+}
+
+body.style-cartoon .fixed.z-\[200\] .bg-white\/\[0\.02\],
+body.style-cartoon .fixed.z-\[200\] .bg-white\/\[0\.01\] {
+  /* Inner cards like Bangla Calendar, Standard Date */
+  border: 2px solid white !important;
+  background-color: #303030 !important;
+  box-shadow: 3px 3px 0px 0px rgba(255, 255, 255, 0.2) !important;
+  border-radius: 16px !important;
+}
+
+body.style-cartoon .fixed.z-\[200\] .rounded-\[2\.5rem\] {
+  border-radius: 32px !important;
+}
+
+/* Timeline dots */
+body.style-cartoon .fixed.z-\[200\] .rounded-full.bg-\[var\(--accent-main\)\]\/30 {
+  background-color: var(--accent-main) !important;
+  border: 2px solid white !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+body.style-cartoon .bangla-font {
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8);
+  letter-spacing: 0.05em;
+}
+
+
+/* --- Colourbook Style --- */
+/* High contrast, white/paper feel, black lines */
+body.style-colourbook {
+  --cred-nero: #FFFFFF;
+  --cred-onyx: #F5F5F5;
+  --md-sys-color-surface: #FFFFFF;
+  --md-sys-color-surface-variant: #F0F0F0;
+  --md-sys-color-on-surface: #000000;
+  --cred-glass-border: #000000;
+  --accent-main: #000000 !important;
+  --accent-glow: transparent !important;
+  --text-primary: #000000 !important;
+  background-color: #FFFFFF !important;
+  background-image:
+    linear-gradient(#E5E5E5 1px, transparent 1px),
+    linear-gradient(90deg, #E5E5E5 1px, transparent 1px) !important;
+  color: #000000 !important;
+}
+
+body.style-colourbook .cred-card,
+body.style-colourbook .m3-card-elevated,
+body.style-colourbook .m3-card-outlined,
+body.style-colourbook button {
+  background: #FFFFFF !important;
+  border: 2px solid #000000 !important;
+  box-shadow: none !important;
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+/* --- UNIVERSAL SKETCH THEME ENFORCEMENT --- */
+/* This block aggressively forces the "Wireframe" look: Black Text on White Background */
+/* It overrides all other specific Tailwind color utilities */
+
+/* 1. Force ALL text black */
+body.style-colourbook,
+body.style-colourbook div,
+body.style-colourbook span,
+body.style-colourbook p,
+body.style-colourbook h1,
+body.style-colourbook h2,
+body.style-colourbook h3,
+body.style-colourbook h4,
+body.style-colourbook h5,
+body.style-colourbook h6,
+body.style-colourbook a,
+body.style-colourbook button,
+body.style-colourbook li,
+body.style-colourbook label,
+body.style-colourbook input,
+body.style-colourbook select,
+body.style-colourbook textarea {
+  color: #000000 !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #000000 !important;
+  caret-color: #000000 !important;
+}
+
+/* 2. Force Header/Nav/Sticky Backgrounds to White */
+body.style-colourbook header,
+body.style-colourbook nav,
+body.style-colourbook .sticky,
+body.style-colourbook .fixed.z-\[200\]>div.relative,
+/* Tithi Modal Container */
+body.style-colourbook .fixed.z-\[150\]>div.relative,
+/* Theme Selector Container */
+body.style-colourbook .modal-content,
+body.style-colourbook .bg-white\/\[0\.02\],
+/* Cards */
+body.style-colourbook .bg-white\/\[0\.03\],
+/* Cards */
+body.style-colourbook .bg-white\/5,
+/* Buttons */
+body.style-colourbook .bg-\[\#050505\],
+/* Dark Backgrounds */
+body.style-colourbook .bg-\[\#050505\]\/90,
+body.style-colourbook .bg-\[\#050505\]\/80,
+body.style-colourbook .bg-\[\#121212\] {
+  background-color: #FFFFFF !important;
+  background-image: none !important;
+  background: #FFFFFF !important;
+  border-color: #000000 !important;
+}
+
+/* 3. Force Icons Black */
+body.style-colourbook svg,
+body.style-colourbook path,
+body.style-colourbook circle,
+body.style-colourbook rect,
+body.style-colourbook line,
+body.style-colourbook polyline,
+body.style-colourbook polygon {
+  color: #000000 !important;
+  stroke: #000000 !important;
+  /* Don't force fill to black, or filled icons become solid blobs. Use currentColor. */
+}
+
+/* 4. Formatting Specifics */
+/* Ensure Buttons have borders */
+body.style-colourbook button {
+  border: 2px solid #000000 !important;
+}
+
+/* Ensure Lunar Background doesn't look weird (Moon Glow) */
+body.style-colourbook .lunar-background .absolute {
+  background: transparent !important;
+  filter: none !important;
+}
+
+/* Ensure Logo Text is Black */
+body.style-colourbook .logo-text,
+body.style-colourbook span.bangla-font {
+  color: #000000 !important;
+}
+
+/* --- UNIVERSAL RETRO ENFORCEMENT (Old Script) --- */
+/* Forces Sepia/Parchment look, overriding dark mode elements */
+
+body.style-oldscript {
+  --cred-nero: #FDF5E6;
+  /* Old Lace */
+  --cred-onyx: #F4E4BC;
+  --md-sys-color-surface: #FDF5E6;
+  --md-sys-color-surface-variant: #F4E4BC;
+  --md-sys-color-on-surface: #4B3621;
+  /* Sepia/Brown */
+  --cred-glass-border: #8B4513;
+  --accent-main: #8B4513 !important;
+  /* Force Brown Accent */
+  --accent-glow: rgba(139, 69, 19, 0.2) !important;
+
+  background-color: #FDF5E6 !important;
+  background-image:
+    radial-gradient(#8B4513 0.5px, transparent 0.5px),
+    radial-gradient(#8B4513 0.5px, #FDF5E6 0.5px) !important;
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+  color: #4B3621 !important;
+}
+
+/* 1. Force ALL text Sepia */
+body.style-oldscript,
+body.style-oldscript div,
+body.style-oldscript span,
+body.style-oldscript p,
+body.style-oldscript h1,
+body.style-oldscript h2,
+body.style-oldscript h3,
+body.style-oldscript h4,
+body.style-oldscript h5,
+body.style-oldscript h6,
+body.style-oldscript a,
+body.style-oldscript button,
+body.style-oldscript li,
+body.style-oldscript label,
+body.style-oldscript input,
+body.style-oldscript select,
+body.style-oldscript textarea {
+  color: #4B3621 !important;
+  text-shadow: none !important;
+  -webkit-text-fill-color: #4B3621 !important;
+  font-family: serif !important;
+}
+
+/* 2. Force Backgrounds to Parchment */
+body.style-oldscript header,
+body.style-oldscript nav,
+body.style-oldscript .sticky,
+body.style-oldscript .fixed.z-\[200\]>div.relative,
+/* Tithi Modal */
+body.style-oldscript .fixed.z-\[150\]>div.relative,
+/* Theme Selector */
+body.style-oldscript .modal-content,
+body.style-oldscript .bg-\[\#050505\],
+body.style-oldscript .bg-\[\#050505\]\/90,
+body.style-oldscript .bg-\[\#121212\] {
+  background-color: #FDF5E6 !important;
+  background-image: none !important;
+  background: #FDF5E6 !important;
+  border-color: #8B4513 !important;
+}
+
+/* 3. Cards & Buttons (Darker Parchment) */
+body.style-oldscript .cred-card,
+body.style-oldscript .m3-card-elevated,
+body.style-oldscript .m3-card-outlined,
+body.style-oldscript button,
+body.style-oldscript .bg-white\/\[0\.02\],
+body.style-oldscript .bg-white\/\[0\.03\],
+body.style-oldscript .bg-white\/5 {
+  background-color: #F4E4BC !important;
+  background: #F4E4BC !important;
+  border: 1px solid #8B4513 !important;
+  box-shadow: inset 0 0 10px rgba(139, 69, 19, 0.1) !important;
+  color: #4B3621 !important;
+}
+
+/* 4. Force Icons & Accents to Brown */
+body.style-oldscript svg,
+body.style-oldscript path,
+body.style-oldscript circle,
+body.style-oldscript rect,
+body.style-oldscript .text-\[var\(--accent-main\)\] {
+  color: #8B4513 !important;
+  stroke: #8B4513 !important;
+  /* Careful with fill */
+}
+
+/* --- Retro Theme Specific Fixes (Today/Modal) --- */
+/* Fix "Today" Text specifically if not caught by universal */
+body.style-oldscript .text-4xl.font-black {
+  color: #4B3621 !important;
+  -webkit-text-fill-color: #4B3621 !important;
+}
+
+/* Fix Modal Backgrounds (Specific Overrides) */
+body.style-oldscript .fixed.z-\[200\] .bg-\[\#050505\],
+body.style-oldscript .fixed.z-\[200\] .bg-\[\#050505\]\/80 {
+  background-color: #FDF5E6 !important;
+  color: #4B3621 !important;
+  border: 3px solid #8B4513 !important;
+}
+
+/* Fix Modal Inner Cards */
+body.style-oldscript .fixed.z-\[200\] .bg-white\/\[0\.02\],
+body.style-oldscript .fixed.z-\[200\] .bg-\[\#121212\] {
+  background-color: #F4E4BC !important;
+  border: 2px solid #8B4513 !important;
+  box-shadow: inset 0 0 10px rgba(139, 69, 19, 0.1) !important;
+}
+
+/* Fix Modal Text Colors */
+body.style-oldscript .fixed.z-\[200\] .text-white,
+body.style-oldscript .fixed.z-\[200\] .text-white\/30,
+body.style-oldscript .fixed.z-\[200\] .text-white\/50,
+body.style-oldscript .fixed.z-\[200\] .text-white\/80 {
+  color: #4B3621 !important;
+  text-shadow: none !important;
+}
+
+/* Specific Retro Today/Hero Card Polish */
+body.style-oldscript .cred-hero-card {
+  background: #E8D4A2 !important;
+  /* Richer Parchment */
+  border: 4px double #8B4513 !important;
+  /* Double Vintage Border */
+  box-shadow: 4px 4px 0px 0px rgba(139, 69, 19, 0.4) !important;
+}
+
+/* Ensure text inside header of Hero card is distinct */
+body.style-oldscript .cred-hero-card h3 {
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid rgba(139, 69, 19, 0.3);
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+/* Specific Fix for Today's Panjika (Hero Card) in Sketch Theme */
+body.style-colourbook .cred-hero-card {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  /* Kill the gradient */
+  border: 3px solid #000000 !important;
+  box-shadow: 8px 8px 0px 0px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Ensure text inside is fully black */
+body.style-colourbook .cred-hero-card h3,
+body.style-colourbook .cred-hero-card span,
+body.style-colourbook .cred-hero-card div {
+  color: #000000 !important;
+  text-shadow: none !important;
+}
+
+/* Reset the icon container background inside the card */
+body.style-colourbook .cred-hero-card .rounded-xl {
+  background: #FFFFFF !important;
+  border: 1px solid #000000 !important;
+}

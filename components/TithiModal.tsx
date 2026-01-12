@@ -21,6 +21,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
     onClose,
     advice,
     adviceLoading,
+    onSetReminder
 }) => {
     React.useEffect(() => {
         if (isOpen) {

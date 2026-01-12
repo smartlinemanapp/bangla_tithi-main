@@ -39,6 +39,18 @@ const App: React.FC = () => {
 
     return saved ? JSON.parse(saved) : PALETTES[0];
   });
+  const [currentStyle, setCurrentStyle] = useState<string>(() => {
+    return localStorage.getItem('bangla_tithi_style') || 'modern';
+  });
+
+  // Apply style class to body
+  useEffect(() => {
+    document.body.classList.remove('style-cartoon', 'style-colourbook', 'style-oldscript');
+    if (currentStyle !== 'modern') {
+      document.body.classList.add(`style-${currentStyle}`);
+    }
+    localStorage.setItem('bangla_tithi_style', currentStyle);
+  }, [currentStyle]);
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isPremium, setIsPremium] = useState(getLicenseStatus());
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
@@ -743,9 +755,21 @@ const App: React.FC = () => {
         isOpen={isThemeOpen}
         onClose={() => setIsThemeOpen(false)}
         currentTheme={currentPalette.name}
+        currentStyle={currentStyle}
         onSelect={(p) => {
           setCurrentPalette(p);
-          setIsThemeOpen(false);
+          // Keep open to allow style change or close manually? 
+          // Current behavior closes on color select. Let's keep it consistent or allow multiple?
+          // User request did not specify, but usually style + color is a combo.
+          // Let's NOT close on color select to allow style select too, OR just follow existing pattern.
+          // Existing pattern closes on color select. I will maintain that for color, but maybe style selection should also close?
+          // Actually, let's keep it open for color select if we want to mix and match?
+          // No, existing code closes: setIsThemeOpen(false).
+          // I will modify it to NOT close on color select so user can try combinations.
+          setCurrentPalette(p);
+        }}
+        onSelectStyle={(s) => {
+          setCurrentStyle(s);
         }}
       />
 

@@ -71,8 +71,8 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
 
     if (!isOpen) return null;
 
-    return (
-        <div className="fixed inset-0 z-[350] flex items-center justify-center p-4">
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 sm:p-6">
             <div className="absolute inset-0 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300" onClick={onClose} />
 
             <M3Card
@@ -139,8 +139,8 @@ export const ReminderFormModal: React.FC<ReminderFormModalProps> = ({
                             type="submit"
                             disabled={loading}
                             className={`w-full py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.4em] transition-all disabled:opacity-50 active:scale-95 bangla-font shadow-xl ${editingReminder
-                                    ? 'bg-white text-black hover:bg-white/90'
-                                    : 'bg-[var(--accent-main)] text-black hover:opacity-90'
+                                ? 'bg-white text-black hover:bg-white/90'
+                                : 'bg-[var(--accent-main)] text-black hover:opacity-90'
                                 }`}
                         >
                             {loading ? 'প্রক্রিয়া চলছে...' : (editingReminder ? 'পরিবর্তন করুন' : 'নিশ্চিত করুন')}
