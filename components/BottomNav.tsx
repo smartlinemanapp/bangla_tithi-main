@@ -55,15 +55,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({ activeTab, onTabChange }) 
     ];
 
     return (
-        <div className="fixed bottom-8 left-0 right-0 z-[100] px-6">
-            <nav className="max-w-md mx-auto bg-[#121212]/80 backdrop-blur-3xl border border-white/10 rounded-[2.5rem] p-2 flex justify-around items-center shadow-2xl">
+        <div className="fixed bottom-6 left-0 right-0 z-[100] px-4">
+            <nav className="max-w-md mx-auto bg-[#121212]/80 backdrop-blur-3xl border border-white/10 rounded-[2rem] p-1.5 flex justify-around items-center shadow-2xl">
                 {tabs.map((tab) => {
                     const isActive = activeTab === tab.id;
                     return (
                         <button
                             key={tab.id}
                             onClick={() => onTabChange(tab.id)}
-                            className="flex flex-col items-center gap-1 group relative py-3 px-6 rounded-3xl transition-all duration-500"
+                            className="flex flex-col items-center gap-1 group relative py-2.5 px-4 rounded-3xl transition-all duration-500"
                         >
                             <div className={`
                                 relative transition-all duration-500 transform

@@ -4,13 +4,13 @@ import { BanglaDate, BANGLA_MONTHS, BANGLA_MONTHS_BN } from "../types";
 export const getBanglaDate = (date: Date): BanglaDate => {
   const year = date.getFullYear();
   const pohelaBoishakh = new Date(year, 3, 14);
-  
+
   let bYear = year - 593;
   let bMonthIndex = 0;
   let bDay = 0;
 
   let daysPassed = Math.floor((date.getTime() - pohelaBoishakh.getTime()) / (1000 * 60 * 60 * 24));
-  
+
   if (daysPassed < 0) {
     bYear = year - 594;
     const prevPohela = new Date(year - 1, 3, 14);
@@ -52,7 +52,7 @@ export const formatBengaliTime = (isoString: string): string => {
   const date = new Date(isoString);
   let hours = date.getHours();
   const minutes = date.getMinutes();
-  
+
   let period = '';
   if (hours >= 4 && hours < 6) period = 'ভোর';
   else if (hours >= 6 && hours < 12) period = 'সকাল';
@@ -66,3 +66,23 @@ export const formatBengaliTime = (isoString: string): string => {
 
   return `${period} ${toBengaliNumber(displayHours)}:${toBengaliNumber(displayMinutes)}`;
 };
+
+/**
+ * Formats a Date object to a full Gregorian date string in Bengali
+ * e.g., "১৮ই জানুয়ারি, ২০২৬"
+ */
+export const formatFullBengaliDate = (date: Date): string => {
+  const day = date.getDate();
+  const monthIndex = date.getMonth();
+  const year = date.getFullYear();
+
+  const monthName = ENGLISH_MONTHS_BN[monthIndex];
+
+  // Add ordinal suffix in Bengali if needed (optional, keeping it simple for now)
+  const dayStr = toBengaliNumber(day);
+  const yearStr = toBengaliNumber(year);
+
+  return `${dayStr}ই ${monthName}, ${yearStr}`;
+};
+
+import { ENGLISH_MONTHS_BN } from "../types";

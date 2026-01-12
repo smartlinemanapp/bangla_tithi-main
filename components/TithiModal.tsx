@@ -4,6 +4,7 @@ import ReactDOM from 'react-dom';
 import { TithiEvent, DAYS_BN, BANGLA_MONTHS_BN, ENGLISH_MONTHS_BN } from '../types';
 import { getBanglaDate, toBengaliNumber, formatBengaliTime } from '../utils/banglaUtils';
 import { triggerHaptic } from '../utils/hapticUtils';
+import { scheduleTithiReminder } from '../utils/notificationUtils';
 
 interface TithiModalProps {
     tithi: TithiEvent | null;
@@ -11,6 +12,7 @@ interface TithiModalProps {
     onClose: () => void;
     advice: string;
     adviceLoading: boolean;
+    onSetReminder?: (tithi: TithiEvent) => void;
 }
 
 export const TithiModal: React.FC<TithiModalProps> = ({
@@ -69,7 +71,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
             <div className={`
                 relative w-full max-w-lg 
                 max-h-[90vh] flex flex-col
-                rounded-t-[3.5rem] sm:rounded-[4rem] 
+                rounded-t-[2.5rem] sm:rounded-[3rem] 
                 shadow-2xl animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-20 duration-700
                 border-t sm:border border-white/5
                 bg-[#050505] text-white
@@ -90,7 +92,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
                 </div>
 
                 {/* Sticky Header Section */}
-                <div className="px-10 pt-4 pb-4 relative z-20 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
+                <div className="px-6 pt-3 pb-3 relative z-20 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
                     <div className="flex justify-between items-start">
                         <div className="flex flex-col gap-2">
                             <span className="text-[10px] font-black bangla-font uppercase tracking-tight text-[var(--accent-main)]">বিষদ বিবরণ</span>
@@ -100,7 +102,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
                         </div>
                         <button
                             onClick={handleClose}
-                            className="p-4 rounded-3xl bg-white/5 hover:bg-white/10 active:scale-90 transition-all border border-white/5 shadow-xl"
+                            className="p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-90 transition-all border border-white/5 shadow-xl"
                         >
                             <svg className="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
@@ -110,11 +112,11 @@ export const TithiModal: React.FC<TithiModalProps> = ({
                 </div>
 
                 {/* Scrollable Content Area */}
-                <div className="flex-1 overflow-y-auto px-10 pb-10 pt-6 relative z-10 custom-scrollbar">
+                <div className="flex-1 overflow-y-auto px-6 pb-6 pt-4 relative z-10 custom-scrollbar">
                     <div className="space-y-6">
                         {/* Timeline Information */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 flex flex-col gap-2">
+                            <div className="p-4 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col gap-2">
                                 <span className="text-[8px] font-black uppercase tracking-widest text-white/30">Bangla Calendar</span>
                                 {(() => {
                                     const b = getBanglaDate(new Date(tithi.date));
@@ -125,7 +127,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
                                     );
                                 })()}
                             </div>
-                            <div className="p-6 rounded-[2.5rem] bg-white/[0.02] border border-white/5 flex flex-col gap-2">
+                            <div className="p-4 rounded-[2rem] bg-white/[0.02] border border-white/5 flex flex-col gap-2">
                                 <span className="text-[8px] font-black uppercase tracking-widest text-white/30">Standard Date</span>
                                 <span className="text-base font-black text-white/80">
                                     {toBengaliNumber(new Date(tithi.date).getDate())} {ENGLISH_MONTHS_BN[new Date(tithi.date).getMonth()]}
@@ -135,7 +137,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
 
                         {/* Solar Data */}
                         {tithi.sun && (
-                            <div className="flex items-center justify-between p-6 rounded-[2.5rem] bg-gradient-to-r from-white/[0.01] to-white/[0.03] border border-white/5 relative overflow-hidden">
+                            <div className="flex items-center justify-between p-4 rounded-[2rem] bg-gradient-to-r from-white/[0.01] to-white/[0.03] border border-white/5 relative overflow-hidden">
                                 { /* Ambient Glow for Day Length */}
                                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[var(--accent-main)]/5 blur-3xl rounded-full"></div>
 
@@ -159,7 +161,7 @@ export const TithiModal: React.FC<TithiModalProps> = ({
 
                         {/* Sacred Timing (Tithi Duration) */}
                         {tithi.event && (
-                            <div className="p-8 rounded-[3rem] bg-[#121212] border border-white/5 shadow-inner relative overflow-hidden">
+                            <div className="p-6 rounded-[2rem] bg-[#121212] border border-white/5 shadow-inner relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     <svg className="w-12 h-12 text-[var(--accent-main)]" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67V7z" />
@@ -197,10 +199,14 @@ export const TithiModal: React.FC<TithiModalProps> = ({
 
                                     <div className="mt-12 flex flex-col gap-4">
                                         <button
-                                            onClick={handleClose}
+                                            onClick={() => {
+                                                if (tithi && onSetReminder) {
+                                                    onSetReminder(tithi);
+                                                }
+                                            }}
                                             className="w-full py-5 rounded-[2rem] font-black text-[10px] uppercase tracking-[0.4em] transition-all bg-[var(--accent-main)] text-black hover:bg-[#D4AB76] shadow-2xl copper-glow"
                                         >
-                                            Dismiss Dashboard
+                                            Set Reminder
                                         </button>
                                         <p className="text-center text-[9px] font-black bangla-font opacity-20 uppercase tracking-widest">বঙ্গ তিথি দর্পণ</p>
                                     </div>

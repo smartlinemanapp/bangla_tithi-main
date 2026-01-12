@@ -82,13 +82,13 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSe
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-sm rounded-[3rem] p-8 bg-[#121212] border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
-                <h3 className="text-xl font-black bangla-font text-white mb-6 flex items-center gap-3">
+            <div className="relative w-full max-w-sm rounded-[2rem] p-6 bg-[#121212] border border-white/10 shadow-2xl animate-in zoom-in-95 duration-300">
+                <h3 className="text-lg font-black bangla-font text-white mb-4 flex items-center gap-3">
                     <div className="w-1.5 h-6 rounded-full bg-[var(--accent-main)] shadow-[0_0_10px_var(--accent-glow)]"></div>
                     রঙ পরিবর্তন করুন
                 </h3>
 
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-5 gap-3">
                     {PALETTES.map((p) => (
                         <button
                             key={p.name}
@@ -119,7 +119,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSe
 
                 <button
                     onClick={onClose}
-                    className="mt-8 w-full py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-white/5"
+                    className="mt-6 w-full py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] bg-white/5 text-white/60 hover:bg-white/10 transition-all border border-white/5"
                 >
                     বন্ধ করুন
                 </button>

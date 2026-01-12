@@ -15,7 +15,11 @@ import { ThemeSelector, PALETTES, ThemePalette } from './components/ThemeSelecto
 import { supabase, isSupabaseConfigured } from './services/supabase';
 import { PremiumLock } from './components/PremiumLock';
 import { LicenseModal } from './components/LicenseModal';
+import { RemindersModal } from './components/RemindersModal';
+import { ReminderOptionsModal } from './components/ReminderOptionsModal';
+import { ReminderFormModal } from './components/ReminderFormModal';
 import { getLicenseStatus } from './services/license';
+import { scheduleTithiReminder } from './utils/notificationUtils';
 
 type FilterType = 'All' | 'Purnima' | 'Amavasya' | 'Ekadashi' | 'Festival';
 
@@ -38,6 +42,12 @@ const App: React.FC = () => {
   const [isThemeOpen, setIsThemeOpen] = useState(false);
   const [isPremium, setIsPremium] = useState(getLicenseStatus());
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
+  const [isRemindersOpen, setIsRemindersOpen] = useState(false);
+  const [isReminderOptionsOpen, setIsReminderOptionsOpen] = useState(false);
+  const [isReminderFormOpen, setIsReminderFormOpen] = useState(false);
+  const [selectedTithiForReminder, setSelectedTithiForReminder] = useState<TithiEvent | null>(null);
+  const [editingReminder, setEditingReminder] = useState<any>(null);
+  const [refreshRemindersTrigger, setRefreshRemindersTrigger] = useState(0);
 
   const todayStr = useMemo(() => {
     const now = new Date();
@@ -284,7 +294,7 @@ const App: React.FC = () => {
           onClick={() => handleTithiClick(t)}
           variant={isHero ? 'elevated' : 'outlined'}
           className={`
-            relative group p-6 overflow-hidden border-none 
+            relative group p-4 overflow-hidden border-none 
             transition-all duration-500 hover:scale-[1.01] active:scale-[0.98]
             ${isHero ? `cred-hero-card ${colorClass}` : `${activeTheme.card} ${isSelected ? 'ring-2 ring-[var(--accent-main)]/20 shadow-lg' : 'hover:shadow-md'}`}
             animate-in fade-in slide-in-from-bottom-2 duration-500
@@ -292,7 +302,7 @@ const App: React.FC = () => {
         >
           {isHero && <LunarBackground type={eventType} />}
 
-          <div className="relative z-10 flex flex-col gap-4">
+          <div className="relative z-10 flex flex-col gap-3">
             <div className="flex justify-between items-start">
               <div className="flex items-center gap-3">
                 <div className={`p-2.5 rounded-xl shadow-inner ${isHero ? 'bg-white/10 backdrop-blur-3xl border border-white/20' : 'bg-white/[0.03]'}`}>
@@ -317,27 +327,34 @@ const App: React.FC = () => {
                 </div>
               </div>
               {!isHero && (
-                <div className="px-3 py-1.5 rounded-xl flex flex-col items-center justify-center min-w-[50px] bg-white/[0.02] border border-white/[0.05]">
-                  <span className={`text-lg font-black leading-none ${activeTheme.textMain}`}>{toBengaliNumber(new Date(t.date).getDate())}</span>
-                  <span className={`text-[7px] font-black opacity-40 uppercase tracking-widest mt-0.5 ${activeTheme.textMain}`}>{ENGLISH_MONTHS_BN[new Date(t.date).getMonth()]}</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedTithiForReminder(t);
+                      setIsReminderOptionsOpen(true);
+                    }}
+                    className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-[var(--accent-main)] hover:bg-white/10 active:scale-95 transition-all shadow-lg"
+                    title="Set Reminder"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                  </button>
+                  <div className="px-3 py-1.5 rounded-xl flex flex-col items-center justify-center min-w-[50px] bg-white/[0.02] border border-white/[0.05]">
+                    <span className={`text-lg font-black leading-none ${activeTheme.textMain}`}>{toBengaliNumber(new Date(t.date).getDate())}</span>
+                    <span className={`text-[7px] font-black opacity-40 uppercase tracking-widest mt-0.5 ${activeTheme.textMain}`}>{ENGLISH_MONTHS_BN[new Date(t.date).getMonth()]}</span>
+                  </div>
                 </div>
               )}
             </div>
 
-            <div className={`flex justify-between items-center gap-2 py-4 px-1 border-y ${isHero ? 'border-white/10' : 'border-white/5'}`}>
+            <div className={`flex justify-between items-center gap-2 py-3 px-1 border-y ${isHero ? 'border-white/10' : 'border-white/5'}`}>
               <TimeBlock label="আরম্ভ" isoDateTime={t.event?.startDateTime || ''} isHero={isHero} />
               <div className={`h-8 w-[1px] hidden sm:block ${isHero ? 'bg-white/10' : 'bg-white/5'} opacity-20`}></div>
               <TimeBlock label="সমাপ্তি" isoDateTime={t.event?.endDateTime || ''} isEnd isHero={isHero} />
             </div>
 
-            {isHero && (
-              <button
-                onClick={(e) => { e.stopPropagation(); triggerHaptic('medium'); alert('রিমাইন্ডার সেট করা হয়েছে (Demo)'); }}
-                className="w-full py-4 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all bg-[var(--accent-main)] text-black hover:opacity-90 shadow-xl copper-glow"
-              >
-                Set Reminder
-              </button>
-            )}
           </div>
         </M3Card>
       </div>
@@ -352,7 +369,7 @@ const App: React.FC = () => {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-28 border-r border-b border-white/[0.02] bg-white/[0.01]" />);
+      days.push(<div key={`empty-${i}`} className="h-24 border-r border-b border-white/[0.02] bg-white/[0.01]" />);
     }
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -397,7 +414,7 @@ const App: React.FC = () => {
     ];
 
     return (
-      <div className="flex overflow-x-auto gap-2 pb-4 no-scrollbar -mx-5 px-5 scroll-smooth">
+      <div className="flex overflow-x-auto gap-1.5 pb-3 no-scrollbar -mx-4 px-4 scroll-smooth">
         {filters.map(f => (
           <button
             key={f.val}
@@ -431,7 +448,7 @@ const App: React.FC = () => {
   return (
     <div className={`min-h-screen pb-32 transition-colors duration-500 font-sans ${activeTheme.bg} ${activeTheme.textMain}`}>
       {/* Top App Bar - Fixed/Pinned */}
-      <header className={`backdrop-blur-xl border-b p-5 sticky top-0 z-50 transition-all duration-500 ${activeTheme.header} safe-top`}>
+      <header className={`backdrop-blur-xl border-b p-3.5 sticky top-0 z-50 transition-all duration-500 ${activeTheme.header} safe-top`}>
         <div className="max-w-3xl mx-auto flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-[var(--accent-main)]/10">
@@ -446,6 +463,15 @@ const App: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => { triggerHaptic('selection'); setIsRemindersOpen(true); }}
+              className="p-3 rounded-2xl bg-white/5 border border-white/10 text-white/40 hover:text-[var(--accent-main)] hover:bg-white/10 transition-all group"
+              title="Manage Reminders"
+            >
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+              </svg>
+            </button>
             <button
               onClick={() => {
                 triggerHaptic('selection');
@@ -481,15 +507,15 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto mt-6 px-5 relative pb-20">
+      <main className="max-w-3xl mx-auto mt-4 px-4 relative pb-20">
 
         {/* Tab 1: Home (Redesigned: Today & Solar & Quick Highlights) */}
         {activeTab === 'home' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-8">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 space-y-6">
             {/* 1. Today's Premium Hero */}
-            <section className="relative overflow-hidden rounded-[2.5rem] p-10 -mx-1 cred-hero-card text-white border border-[#C49B66]/20">
-              <div className="absolute top-0 right-0 p-8 opacity-5">
-                <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8 0 1010.586 10.586z" /></svg>
+            <section className="relative overflow-hidden rounded-[2rem] p-7 -mx-1 cred-hero-card text-white border border-[#C49B66]/20">
+              <div className="absolute top-0 right-0 p-6 opacity-5">
+                <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
               </div>
               <div className="relative z-10 flex flex-col gap-10">
                 <div className="flex justify-between items-start">
@@ -505,8 +531,8 @@ const App: React.FC = () => {
                   <div className="px-4 py-2 bg-white/5 backdrop-blur-3xl rounded-full border border-white/5 text-[11px] font-black bangla-font tracking-tight text-[var(--accent-main)]">আজকের দিন</div>
                 </div>
 
-                <div className="flex items-center gap-6 py-6 border-t border-white/5 mt-4">
-                  <div className="flex-1 flex flex-col items-center p-4 rounded-3xl bg-white/[0.02] border border-white/[0.03]">
+                <div className="flex items-center gap-6 py-4 border-t border-white/5 mt-4">
+                  <div className="flex-1 flex flex-col items-center p-3 rounded-2xl bg-white/[0.02] border border-white/[0.03]">
                     <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Bangla Date</span>
                     <span className="text-xl font-black text-[var(--accent-main)]">
                       {(() => {
@@ -515,7 +541,7 @@ const App: React.FC = () => {
                       })()}
                     </span>
                   </div>
-                  <div className="flex-1 flex flex-col items-center p-4 rounded-3xl bg-white/[0.02] border border-white/[0.03]">
+                  <div className="flex-1 flex flex-col items-center p-3 rounded-2xl bg-white/[0.02] border border-white/[0.03]">
                     <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">Bangla Year</span>
                     <span className="text-xl font-black text-[var(--accent-main)]">
                       {toBengaliNumber(getBanglaDate(new Date()).year.toString())}
@@ -537,7 +563,7 @@ const App: React.FC = () => {
                   <CompactTithiCard t={todayTithi} isHero />
                 </div>
               ) : (
-                <M3Card variant="outlined" className="p-6 border-dashed flex items-center gap-4 bg-white/[0.02] border-white/10">
+                <M3Card variant="outlined" className="p-4 border-dashed flex items-center gap-4 bg-white/[0.02] border-white/10">
                   <div className="p-3 rounded-full bg-[var(--accent-main)]/10">
                     <svg className="w-5 h-5 text-[var(--accent-main)] opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
                   </div>
@@ -559,7 +585,7 @@ const App: React.FC = () => {
                 title="Advanced Solar Data"
               >
                 <div className="grid grid-cols-2 gap-4">
-                  <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
+                  <div className={`p-4 rounded-[2rem] border ${activeTheme.card} flex flex-col gap-2.5 relative overflow-hidden group cred-card`}>
                     <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-main)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-main)]/10 transition-all"></div>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66] flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-main)] copper-glow"></span> RAW SUNRISE
@@ -570,7 +596,7 @@ const App: React.FC = () => {
                     <span className="text-[9px] font-medium text-white/30 uppercase tracking-[0.1em]">Horizon Check • IST</span>
                   </div>
 
-                  <div className={`p-6 rounded-[2.5rem] border ${activeTheme.card} flex flex-col gap-3 relative overflow-hidden group cred-card`}>
+                  <div className={`p-4 rounded-[2rem] border ${activeTheme.card} flex flex-col gap-2.5 relative overflow-hidden group cred-card`}>
                     <div className="absolute -top-4 -right-4 w-24 h-24 bg-[var(--accent-secondary)]/5 rounded-full blur-2xl group-hover:bg-[var(--accent-secondary)]/10 transition-all"></div>
                     <span className="text-[10px] font-black uppercase tracking-[0.15em] text-[var(--accent-secondary)] flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent-secondary)] neon-glow"></span> DUSK CALC
@@ -583,7 +609,7 @@ const App: React.FC = () => {
                 </div>
 
                 {todayTithi?.sun.dayLength && (
-                  <div className={`mt-4 p-5 rounded-3xl border border-white/5 flex justify-between items-center bg-white/[0.01] cred-card`}>
+                  <div className={`mt-3 p-4 rounded-2xl border border-white/5 flex justify-between items-center bg-white/[0.01] cred-card`}>
                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C49B66]">Cycle Duration</span>
                     <span className="text-sm font-black tracking-wider text-white/80">{todayTithi.sun.dayLength}</span>
                   </div>
@@ -628,7 +654,7 @@ const App: React.FC = () => {
               </div>
             </div>
 
-            <M3Card variant="elevated" className="mb-10 overflow-hidden border-none p-0 bg-[#121212] cred-card">
+            <M3Card variant="elevated" className="mb-8 overflow-hidden border-none p-0 bg-[#121212] cred-card">
               <div className="p-5 border-b border-white/5 flex justify-between items-center bg-white/[0.02]">
                 <button onClick={() => { handleDateChange(-1); triggerHaptic('selection'); }} className="p-3 rounded-2xl transition-all hover:bg-white/5 active:scale-95 text-[#C49B66]"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg></button>
                 <h3 className={`font-black uppercase tracking-[0.2em] text-[10px] ${activeTheme.textMain}`}>{currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}</h3>
@@ -729,10 +755,52 @@ const App: React.FC = () => {
         onSuccess={() => setIsPremium(true)}
       />
 
-      <LicenseModal
-        isOpen={isLicenseModalOpen}
-        onClose={() => setIsLicenseModalOpen(false)}
-        onSuccess={() => setIsPremium(true)}
+      <RemindersModal
+        isOpen={isRemindersOpen}
+        onClose={() => {
+          setIsRemindersOpen(false);
+          setSelectedTithiForReminder(null);
+        }}
+        onEdit={(r) => {
+          setEditingReminder(r);
+          setIsReminderFormOpen(true);
+        }}
+        key={`reminders-${refreshRemindersTrigger}`}
+      />
+
+      <ReminderFormModal
+        isOpen={isReminderFormOpen}
+        onClose={() => {
+          setIsReminderFormOpen(false);
+          setEditingReminder(null);
+        }}
+        onSuccess={() => {
+          setRefreshRemindersTrigger(prev => prev + 1);
+        }}
+        editingReminder={editingReminder}
+        initialTitle={selectedTithiForReminder?.event?.banglaName}
+      />
+
+      <ReminderOptionsModal
+        isOpen={isReminderOptionsOpen}
+        onClose={() => setIsReminderOptionsOpen(false)}
+        tithiName={selectedTithiForReminder?.event?.banglaName || 'Tithi'}
+        onSelect={(preset) => {
+          setIsReminderOptionsOpen(false);
+          if (preset === 'custom') {
+            setIsReminderFormOpen(true);
+            return;
+          }
+          if (selectedTithiForReminder) {
+            import('./utils/notificationUtils').then(({ scheduleTithiPresetReminder }) => {
+              scheduleTithiPresetReminder(
+                selectedTithiForReminder.event?.banglaName || 'Tithi',
+                selectedTithiForReminder.event?.startDateTime || selectedTithiForReminder.date,
+                preset
+              );
+            });
+          }
+        }}
       />
 
       <TithiModal
@@ -741,6 +809,10 @@ const App: React.FC = () => {
         onClose={() => setSelectedTithi(null)}
         advice={advice}
         adviceLoading={adviceLoading}
+        onSetReminder={(t) => {
+          setSelectedTithiForReminder(t);
+          setIsReminderOptionsOpen(true);
+        }}
       />
     </div>
   );
