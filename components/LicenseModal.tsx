@@ -74,7 +74,7 @@ export const LicenseModal: React.FC<LicenseModalProps> = ({ isOpen, onClose, onS
                                 type="text"
                                 value={key}
                                 onChange={(e) => setKey(e.target.value)}
-                                placeholder="Enter Promo Code (e.g. BANGLA_PRO)"
+                                placeholder="পাসকোড দিন (যেমন: XXXXX)"
                                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-center text-white font-mono text-xs placeholder:text-white/20 focus:outline-none focus:border-[var(--accent-main)]/50 focus:ring-1 focus:ring-[var(--accent-main)]/50 transition-all"
                             />
                         </div>
