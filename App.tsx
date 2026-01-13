@@ -140,11 +140,34 @@ const App: React.FC = () => {
   }, [syncData]);
 
   useEffect(() => {
-    // Precise theme-color sync for Android Status Bar (Sacred Saffron / Cream)
+    // Dynamic theme-color sync for Android Status Bar based on visual style
     const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+    // Map visual style to appropriate status bar color
+    const styleColors: Record<string, string> = {
+      'modern': '#050505',      // Dark for default theme
+      'cartoon': '#050505',     // Dark background
+      'colourbook': '#FFFFFF',  // White for sketch theme
+      'oldscript': '#FDF5E6',   // Parchment for retro theme
+    };
+    const statusBarColor = styleColors[currentStyle] || '#050505';
+
+    // Update meta tag for browsers
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', '#FFFBF0');
+      metaThemeColor.setAttribute('content', statusBarColor);
     }
+
+    // Native Android Status Bar control via Capacitor
+    import('@capacitor/status-bar').then(({ StatusBar, Style }) => {
+      StatusBar.setBackgroundColor({ color: statusBarColor }).catch(() => { });
+      // Enable overlay mode again and handle padding manually via CSS for best consistency
+      StatusBar.setOverlaysWebView({ overlay: true }).catch(() => { });
+      // Set icon style: dark icons for light backgrounds, light icons for dark
+      const isDarkBg = currentStyle === 'modern' || currentStyle === 'cartoon';
+      StatusBar.setStyle({ style: isDarkBg ? Style.Dark : Style.Light }).catch(() => { });
+    }).catch(() => {
+      // Web environment - StatusBar not available
+    });
 
     // Apply Palette to CSS Variables
     const root = document.documentElement;
@@ -157,7 +180,7 @@ const App: React.FC = () => {
     root.style.setProperty('--accent-secondary-glow', currentPalette.secondaryGlow);
 
     localStorage.setItem('bangla_tithi_palette', JSON.stringify(currentPalette));
-  }, [currentPalette]);
+  }, [currentPalette, currentStyle]);
 
   // Ensure tithis are always sorted chronologically by date
   const sortedTithis = useMemo(() => {
@@ -465,11 +488,16 @@ const App: React.FC = () => {
     );
   };
 
+  const StatusBarSpacer = () => (
+    <div className="h-[var(--status-bar-height)] w-full" />
+  );
+
   return (
     <div className={`min-h-screen pb-32 transition-colors duration-500 font-sans ${activeTheme.bg} ${activeTheme.textMain}`}>
       {/* Top App Bar - Fixed/Pinned */}
-      <header className={`backdrop-blur-xl border-b p-3.5 sticky top-0 z-50 transition-all duration-500 ${activeTheme.header} safe-top`}>
-        <div className="max-w-3xl mx-auto flex justify-between items-center">
+      <header className={`backdrop-blur-xl border-b sticky top-0 z-50 transition-all duration-500 ${activeTheme.header}`}>
+        <StatusBarSpacer />
+        <div className="max-w-3xl mx-auto p-3.5 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-[var(--accent-main)]/10">
               <svg className={`w-6 h-6 ${activeTheme.textAccent}`} fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>

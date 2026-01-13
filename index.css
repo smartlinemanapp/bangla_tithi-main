@@ -79,16 +79,21 @@ body {
 }
 
 /* Safe Area Handling for Notch/Status Bar */
+:root {
+  /* Reduced fallback to 38px for a standard Android status bar height (approx 24-32dp) */
+  --status-bar-height: max(env(safe-area-inset-top), 38px);
+}
+
 .safe-top {
-  padding-top: env(safe-area-inset-top, 42px) !important;
+  padding-top: var(--status-bar-height) !important;
 }
 
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 24px) !important;
+  padding-bottom: env(safe-area-inset-bottom, 32px) !important;
 }
 
 .safe-mt {
-  margin-top: env(safe-area-inset-top, 42px) !important;
+  margin-top: var(--status-bar-height) !important;
 }
 
 /* Navigation Ripple (Simulation) */
