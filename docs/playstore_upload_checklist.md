@@ -17,7 +17,9 @@
 - [ ] Use existing keystore OR create new one
 - [ ] **SAVE KEYSTORE FILE SAFELY** - you need it for ALL future updates
 - [ ] Build Release bundle
-- [ ] Locate AAB: `android/app/release/app-release.aab`
+- [ ] Locate AAB: `android/app/build/outputs/bundle/release/app-release.aab`
+- [ ] **Locate Mapping File**: `android/app/build/outputs/mapping/release/mapping.txt`
+  - *This is the "Deobfuscation File" Google Play is asking for. It allows you to see readable crash reports.*
 
 ### App Assets (First Upload Only)
 - [ ] App Icon: 512x512 PNG (no alpha)
